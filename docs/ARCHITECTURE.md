@@ -1,6 +1,6 @@
 # Resuma Architecture
 
-This document explains *how* Resuma turns a Rust component into an instantly-interactive HTML page without ever shipping a hydration step. If you've used Qwik before, the high-level model will feel familiar — what's new is bringing it to a Rust toolchain end-to-end.
+This document explains *how* Resuma turns a Rust component into an instantly-interactive HTML page without ever shipping a hydration step. The high-level model is **resumability**: serialize server state into HTML and resume interactivity on demand — implemented end-to-end in Rust.
 
 ## 1. The resumability promise
 

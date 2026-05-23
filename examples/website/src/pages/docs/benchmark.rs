@@ -6,7 +6,7 @@ pub fn page(_req: FlowRequest) -> View {
         <>
             <h1>"Bundle benchmark"</h1>
             <p class="lead">
-                "Apples-to-apples comparison of initial JavaScript for a resumable counter page. "
+                "Measured JavaScript for a resumable counter page. "
                 "Static pages (like this docs landing) ship "
                 <strong>"zero"</strong>" client JS."
             </p>
@@ -55,40 +55,6 @@ pub fn page(_req: FlowRequest) -> View {
                 </tbody>
             </table>
 
-            <h2>"Qwik (reference)"</h2>
-            <table class="compare">
-                <thead>
-                    <tr>
-                        <th>"Bundle"</th>
-                        <th>"When loaded"</th>
-                        <th>"Raw"</th>
-                        <th>"Gzip"</th>
-                        <th>"Brotli"</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td><code>"qwikloader"</code></td>
-                        <td>"All interactive pages"</td>
-                        <td>"~1 KiB"</td>
-                        <td>"~2.4 KiB"</td>
-                        <td>"~1.4 KiB"</td>
-                    </tr>
-                    <tr>
-                        <td><code>"qwik-core + handlers"</code></td>
-                        <td>"On demand"</td>
-                        <td>"varies"</td>
-                        <td>"varies"</td>
-                        <td>"varies"</td>
-                    </tr>
-                </tbody>
-            </table>
-            <p>
-                "Qwik numbers from "
-                <a href="https://qwik.dev/docs/advanced/qwikloader/">"qwik.dev/docs/advanced/qwikloader"</a>
-                " and Qwik PR #7519 (optimized qwikloader)."
-            </p>
-
             <h2>"Reproduce locally"</h2>
             {code_block(r#"# Measure embedded bundles (raw + gzip + brotli)
 cd runtime && npm run build && npm run size
@@ -97,15 +63,12 @@ cd runtime && npm run build && npm run size
 curl -H "Accept-Encoding: gzip" http://127.0.0.1:3000/_resuma/benchmark.json
 
 # Resuma counter (interactive — loader + core on first click)
-cargo run -p example-counter
-
-# Qwik counterpart
-cd benchmark/qwik-counter && npm install && npm run build && npm run size"#)}
+cargo run -p example-counter"#)}
 
             <h2>"Takeaways"</h2>
             <ul>
                 <li><strong>"Static-first:"</strong>" Resuma skips loader, payload, and runtime on pages with no interactivity."</li>
-                <li><strong>"Loader parity:"</strong>" Resuma loader (~884 B gzip) is in the same class as Qwik's qwikloader (~2.4 KiB gzip)."</li>
+                <li><strong>"Small loader:"</strong>" loader.js stays under 1 KiB gzip on a typical counter page."</li>
                 <li><strong>"Honest totals:"</strong>" Full interactivity still loads core.js — report loader + core, not just the loader."</li>
                 <li><strong>"Production:"</strong>" Asset routes serve gzip/brotli based on Accept-Encoding."</li>
             </ul>

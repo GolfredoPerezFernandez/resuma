@@ -4,11 +4,19 @@ All notable changes to this project will be documented in this file.
 
 Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [0.2.1] - 2026-05-23
+
+### Changed
+
+- README and docs updated with crates.io / docs.rs links
+- Removed third-party framework comparisons from public docs
+- Benchmark endpoint reports Resuma asset sizes only
+
 ## [0.2.0] - 2026-05-23
 
 ### Changed
 
-- **Breaking:** Consolidated 7 internal crates into a single `resuma` runtime crate (like Qwik's one-package DX).
+- **Breaking:** Consolidated 7 internal crates into a single `resuma` runtime crate (unified one-package DX).
 - Only **2 crates** are published: `resuma` + `resuma-macros` (proc-macros must stay separate in Rust).
 - `resuma-rs2js` merged into `resuma-macros` as an internal module.
 
@@ -34,6 +42,7 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - Examples: counter, todo (backend security reference), flow-demo, flow-pages, website
 - Documentation site and markdown guides under `docs/`
 
+[0.2.1]: https://github.com/GolfredoPerezFernandez/resuma/releases/tag/v0.2.1
 [0.2.0]: https://github.com/GolfredoPerezFernandez/resuma/releases/tag/v0.2.0
 [0.1.1]: https://github.com/GolfredoPerezFernandez/resuma/releases/tag/v0.1.1
 [0.1.0]: https://github.com/GolfredoPerezFernandez/resuma/releases/tag/v0.1.0

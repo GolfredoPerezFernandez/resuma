@@ -1,4 +1,4 @@
-//! Qwik-inspired light theme for docs and landing.
+//! Light theme for docs and landing.
 
 pub const SITE_CSS: &str = r#"<style>
 :root {

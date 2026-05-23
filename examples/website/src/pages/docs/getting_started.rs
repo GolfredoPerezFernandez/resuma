@@ -9,14 +9,13 @@ pub fn page(_req: FlowRequest) -> View {
             <p class="lead">
                 "Resuma is a resumable Rust web framework — no hydration, no eager JS execution. "
                 "Components run on the server; a tiny loader resumes interactivity on demand. "
-                "Resuma Flow adds file-based pages, loads, and submits in one crate — like Qwik + Qwik City, unified."
+                "Resuma Flow adds file-based pages, loads, and submits in one crate — core and full-stack unified."
             </p>
 
             <h2>"Examples in this repo"</h2>
             <p>"See " <a href="/docs/examples">"Examples"</a> " for all runnable crates and when to use each."</p>
             <p>
-                "Rust apps can't run in the browser like Qwik's StackBlitz playgrounds yet. "
-                "Instead, clone the repo and launch a live example in one command:"
+                "Rust apps run on the server — clone the repo and launch a live example in one command:"
             </p>
             <div class="playground-grid">
                 {playground_card(

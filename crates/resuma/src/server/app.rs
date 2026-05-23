@@ -348,24 +348,9 @@ async fn serve_benchmark() -> Json<BenchmarkReport> {
                 brotli,
             })
             .collect(),
-        qwik_reference: vec![
-            BundleSize {
-                name: "qwikloader (docs + 2024 opts)".into(),
-                raw: 1024,
-                gzip: 2499,
-                brotli: 1434,
-            },
-            BundleSize {
-                name: "handler chunk (on demand)".into(),
-                raw: 0,
-                gzip: 0,
-                brotli: 0,
-            },
-        ],
         notes: vec![
             "Resuma static pages ship zero JS — no loader, no payload.".into(),
             "Interactive pages load loader.js first; core.js loads on first interaction or when reactive bindings exist.".into(),
-            "Qwik reference numbers are from qwik.dev/docs and Qwik PR #7519 (gzip ~2.44 KB qwikloader).".into(),
             "Compare the same metric: Network transfer size with Content-Encoding enabled.".into(),
         ],
     })
@@ -374,7 +359,6 @@ async fn serve_benchmark() -> Json<BenchmarkReport> {
 #[derive(Debug, Serialize)]
 struct BenchmarkReport {
     resuma: Vec<BundleSize>,
-    qwik_reference: Vec<BundleSize>,
     notes: Vec<String>,
 }
 

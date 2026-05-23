@@ -8,7 +8,7 @@
 
 **The first Rust web framework with SSR + Resumability + Islands + Server Actions + a friendly JS Bridge.**
 
-*Better than Leptos: zero hydration, true resumability, native islands, automatic Rust→JS handler compilation.*
+*Zero hydration, true resumability, native islands, automatic Rust→JS handler compilation.*
 
 **Install:** [`cargo install resuma`](https://crates.io/crates/resuma) · **Docs:** [docs.rs/resuma](https://docs.rs/resuma) · **Repo:** [GitHub](https://github.com/GolfredoPerezFernandez/resuma)
 
@@ -18,7 +18,7 @@
 
 ## What is this?
 
-Resuma is a from-scratch Rust framework for building modern web apps. It picks the best ideas from the JavaScript world and brings them to Rust **without compromise**:
+Resuma is a from-scratch Rust framework for building modern web apps with **resumability** instead of hydration:
 
 | Feature | Leptos / Yew / Dioxus | **Resuma** |
 | --- | --- | --- |
@@ -104,7 +104,7 @@ Mark any component with `#[island]` and Resuma will package its handlers into an
 
 ## Resuma Flow (full-stack layer)
 
-**One crate** — `resuma` includes core + Flow (like Qwik + Qwik City, unified).
+**One crate** — `resuma` includes core + Flow in a single dependency.
 
 | Resuma Flow | Purpose |
 |-------------|---------|
@@ -186,8 +186,8 @@ resuma dev
 ```
 
 - **Crate:** [crates.io/crates/resuma](https://crates.io/crates/resuma)
-- **API docs:** [docs.rs/resuma/0.2.0](https://docs.rs/resuma/0.2.0)
-- **Proc-macros:** [docs.rs/resuma-macros/0.2.0](https://docs.rs/resuma-macros/0.2.0)
+- **API docs:** [docs.rs/resuma/0.2.1](https://docs.rs/resuma/0.2.1)
+- **Proc-macros:** [docs.rs/resuma-macros/0.2.1](https://docs.rs/resuma-macros/0.2.1)
 
 Library only (no CLI binary):
 

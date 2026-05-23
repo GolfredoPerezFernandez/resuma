@@ -15,9 +15,8 @@
  *   5. Provides `__resuma.action(name, args)` which POSTs to
  *      `/_resuma/action/<name>` and returns the response JSON.
  *
- * This is the closest analog to Qwik's resumability model — the page is
- * "frozen" by the server, and the client thaws individual interactions on
- * demand.
+ * The page is "frozen" by the server, and the client thaws individual
+ * interactions on demand.
  */
 
 import { initSignals, type SignalCell, applyDom, bindReactiveText, bindReactiveAttrs } from "./signals.js";

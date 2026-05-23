@@ -5,7 +5,7 @@ pub fn page(_req: FlowRequest) -> View {
     view! {
         <>
             <h1>"Resuma + Flow"</h1>
-            <p class="lead">"One crate to install — like Qwik, but for Rust."</p>
+            <p class="lead">"One crate to install — core, server, Flow, and CLI together."</p>
 
             <h2>"The model"</h2>
             <table class="docs-table">
@@ -75,18 +75,18 @@ resuma routes --generate --path src/pages   # Flow apps only"#)}
                 </tbody>
             </table>
 
-            <h2>"API map (Qwik → Resuma)"</h2>
+            <h2>"Full-stack API map"</h2>
             <table class="docs-table">
                 <thead>
-                    <tr><th>"Qwik / Qwik City"</th><th>"Resuma Flow"</th></tr>
+                    <tr><th>"Concept"</th><th>"Resuma Flow"</th></tr>
                 </thead>
                 <tbody>
-                    <tr><td>"component$"</td><td>"#[component] + view!"</td></tr>
-                    <tr><td>"routeLoader$"</td><td>"#[load]"</td></tr>
-                    <tr><td>"routeAction$"</td><td>"#[submit]"</td></tr>
-                    <tr><td>"server$"</td><td>"#[server]"</td></tr>
-                    <tr><td>"plugin.ts middleware"</td><td>"#[middleware]"</td></tr>
-                    <tr><td>"src/routes/"</td><td>"src/pages/"</td></tr>
+                    <tr><td>"Component"</td><td>"#[component] + view!"</td></tr>
+                    <tr><td>"Server data loader"</td><td>"#[load]"</td></tr>
+                    <tr><td>"Form mutation"</td><td>"#[submit]"</td></tr>
+                    <tr><td>"Server RPC"</td><td>"#[server]"</td></tr>
+                    <tr><td>"Request middleware"</td><td>"#[middleware]"</td></tr>
+                    <tr><td>"File-based pages"</td><td>"src/pages/"</td></tr>
                 </tbody>
             </table>
         </>

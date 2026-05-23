@@ -1,4 +1,4 @@
-//! Full docs navigation — mirrors Qwik docs structure, mapped to Resuma APIs.
+//! Full docs navigation — mapped to Resuma APIs.
 
 use resuma::prelude::*;
 

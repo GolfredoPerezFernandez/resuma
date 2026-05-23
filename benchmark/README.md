@@ -1,72 +1,45 @@
-# Resuma vs Qwik — bundle benchmark
+# Resuma bundle benchmark
 
-Compare **transfer size** (Network tab) for the same UX: SSR page with one interactive counter.
+Measure initial JavaScript for a resumable counter page vs typical hydration setups.
 
-## Quick measure (Resuma)
-
-```bash
-cd runtime
-npm run build
-npm run size
-```
-
-## Live sizes from server
+## Quick check
 
 ```bash
+# Embedded asset sizes (raw + gzip + brotli)
+cd runtime && npm run build && npm run size
+
+# Live JSON from a running server
 curl -s http://127.0.0.1:3000/_resuma/benchmark.json
+
+# Interactive counter example
+cargo run -p example-counter
 ```
 
-With compression negotiation:
+With gzip enabled:
 
 ```bash
 curl -s -H "Accept-Encoding: gzip" -I http://127.0.0.1:3000/_resuma/loader.js
 curl -s -H "Accept-Encoding: br" -I http://127.0.0.1:3000/_resuma/core.js
 ```
 
-## Run the apps
+## Methodology
 
-| Stack | Command | Port |
-|-------|---------|------|
-| Resuma counter | `cargo run -p example-counter` | 3000 |
-| Resuma docs (static) | `cargo run -p example-website` | 3000 |
-| Qwik | Use [qwik.dev](https://qwik.dev) starter or your existing Qwik app |
+1. Same UX: SSR heading + one interactive counter button.
+2. Chrome DevTools → Network, disable cache, hard reload.
+3. Compare **transfer size** with gzip/brotli enabled (production server).
+4. Report raw (uncompressed) and compressed bytes separately.
 
-## What to compare
+## Resuma (split runtime)
 
-1. **Static landing** — Resuma docs `/` should load **0 JS**.
-2. **Counter page** — compare first load + first click:
-   - Resuma: `loader.js` immediately; `core.js` on first click (or eagerly if reactive bindings exist).
-   - Qwik: `qwikloader` + preloaded chunks per project config.
+| Bundle | When loaded | Raw | Gzip | Brotli |
+|--------|-------------|-----|------|--------|
+| `loader.js` | Interactive pages only | ~1.8 KiB | ~884 B | ~730 B |
+| `core.js` | First interaction or reactive bindings | ~6.6 KiB | ~2.6 KiB | ~2.3 KiB |
+| Static docs page | Never | 0 B | 0 B | 0 B |
 
-## Metrics (same column in DevTools)
+## Takeaways
 
-| Metric | Meaning |
-|--------|---------|
-| **Raw** | Uncompressed file size (`Content-Length` without encoding) |
-| **Transfer** | Bytes on the wire (`Content-Encoding: gzip` or `br`) |
-
-Always compare transfer size with compression enabled — that is what browsers use in production.
-
-## Reference numbers (May 2026)
-
-### Resuma split runtime
-
-| File | Raw | Gzip | Brotli |
-|------|-----|------|--------|
-| `loader.js` | 1.8 KiB | 884 B | 730 B |
-| `core.js` | 6.6 KiB | 2.6 KiB | 2.3 KiB |
-| Static page | 0 | 0 | 0 |
-
-### Qwik (published reference)
-
-| File | Raw | Gzip | Brotli |
-|------|-----|------|--------|
-| `qwikloader` | ~1 KiB | ~2.4 KiB | ~1.4 KiB |
-
-Sources: [Qwikloader docs](https://qwik.dev/docs/advanced/qwikloader/), [Qwik PR #7519](https://github.com/QwikDev/qwik/pull/7519).
-
-## Updating this benchmark
-
-1. Rebuild runtime: `cd runtime && npm run build`
-2. Copy assets to `crates/resuma/assets/` (loader.js, core.js, runtime.js)
-3. Re-run `npm run size` and update `examples/website/src/pages/docs/benchmark.rs`
+- **Static-first:** Resuma skips loader, payload, and runtime on pages with no interactivity.
+- **Small loader:** `loader.js` is under 1 KiB gzip on a typical counter page.
+- **Honest totals:** Full interactivity still loads `core.js` — report loader + core, not just the loader.
+- **Production:** Asset routes serve gzip/brotli based on `Accept-Encoding`.

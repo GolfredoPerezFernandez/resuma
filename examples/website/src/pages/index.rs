@@ -47,13 +47,13 @@ fn Counter() -> View {
 
             <section class="section">
                 <h2 class="section-title">"Why Resuma?"</h2>
-                <p class="section-sub">"Pick the best ideas from Qwik-style resumability and Leptos-grade Rust — without shipping a WASM hydration bundle."</p>
+                <p class="section-sub">"Resumable SSR in Rust — without shipping a WASM hydration bundle."</p>
                 <div class="grid-3">
                     {feature_card("⚡", "Resumable, not hydrated", "Components run on the server only. State and handlers serialize into HTML — the client resumes lazily.")}
                     {feature_card("🏝️", "Islands by default", "Mark interactive regions with #[island]. Each island ships its own JS chunk on demand.")}
                     {feature_card("🦀", "Server actions", "#[server] async fn registers RPC at /_resuma/action/:name — callable from handlers and forms.")}
                     {feature_card("🌊", "Resuma Flow", "Full-stack layer: #[load], #[submit], layouts, middleware, file-based pages — one dependency.")}
-                    {feature_card("📦", "One package", "cargo add resuma gives you core + Flow + macros + server. Like Qwik + Qwik City, unified.")}
+                    {feature_card("📦", "One package", "cargo add resuma gives you core + Flow + macros + server in a single dependency.")}
                     {feature_card("🔗", "JS bridge", "view! translates Rust closures to JS at compile time. js!{} for escape hatches.")}
                 </div>
             </section>

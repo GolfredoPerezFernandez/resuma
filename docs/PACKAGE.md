@@ -1,6 +1,6 @@
 # Resuma package — one install, two layers
 
-Like **Qwik**, but unified: users depend on a single crate.
+Users depend on a **single crate** — core and full-stack Flow ship together.
 
 ```
 ┌─────────────────────────────┐     ┌─────────────────────────────┐
@@ -66,16 +66,16 @@ Only **`resuma`** + **`resuma-macros`** ship on [crates.io](https://crates.io/cr
 | `resuma` | [crates.io/crates/resuma](https://crates.io/crates/resuma) | [docs.rs/resuma](https://docs.rs/resuma) |
 | `resuma-macros` | [crates.io/crates/resuma-macros](https://crates.io/crates/resuma-macros) | [docs.rs/resuma-macros](https://docs.rs/resuma-macros) |
 
-## Qwik → Resuma map
+## Full-stack API map
 
-| Qwik / Qwik City | Resuma |
-|------------------|--------|
-| `component$` | `#[component]` + `view!` |
-| `routeLoader$` | `#[load]` |
-| `routeAction$` | `#[submit]` |
-| `server$` | `#[server]` |
-| `plugin.ts` | `#[middleware]` |
-| `src/routes/` | `src/pages/` |
-| Qwik + Qwik City (2 packages) | `resuma` (1 runtime crate) |
+| Concept | Resuma |
+|---------|--------|
+| Component | `#[component]` + `view!` |
+| Server data loader | `#[load]` |
+| Form mutation | `#[submit]` |
+| Server RPC | `#[server]` |
+| Request middleware | `#[middleware]` |
+| File-based pages | `src/pages/` |
+| Core + routing + CLI | `resuma` (one runtime crate) |
 
-See the live docs: `cargo run -p example-website` → http://127.0.0.1:3000
+See the live docs: https://resuma-docs.fly.dev · or `cargo run -p example-website` → http://127.0.0.1:3000
