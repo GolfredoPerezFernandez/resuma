@@ -144,16 +144,16 @@ Inside `js!{}` you have:
 * `state` — every captured signal as a reactive cell.
 * `__resuma` — the runtime: `__resuma.action(...)`, `__resuma.signals`, `__resuma.refreshIsland(...)`.
 
-## 7. Why this beats Leptos / Yew / Dioxus
+## 7. Resumability vs hydration
 
-| Concern | Leptos / Yew / Dioxus | Resuma |
+| Concern | Classic SSR + hydration | Resuma |
 | --- | --- | --- |
-| Initial bundle | Full component tree compiled to WASM | ~3KB JS runtime |
-| Time to interactive | Wait for WASM compile + hydration | Immediate — only the clicked handler loads |
-| Server actions | Partial (Leptos has them, Yew & Dioxus don't) | First-class `#[server]` + RPC |
-| Islands | Manual / not supported | First-class `#[island]` boundary |
-| JS interop | `wasm-bindgen` boilerplate | `js!{}` macro, automatic state bridge |
-| Tooling | `cargo-leptos` / Trunk | `resuma` CLI bundled in the workspace |
+| Initial bundle | Framework runtime + app code up front | ~3KB loader; core and handlers on demand |
+| Time to interactive | Wait for client bundle + hydration pass | Static HTML is interactive-ready; handlers load on first use |
+| Server mutations | Custom API routes | First-class `#[server]` + `POST /_resuma/action/:name` |
+| Partial interactivity | Split bundles manually | First-class `#[island]` boundary |
+| Escape hatches | Framework-specific | `js!{}` with `state` + `__resuma.action(...)` bridge |
+| Tooling | Separate build pipelines | `resuma` CLI: `new`, `dev`, `build`, `routes` |
 
 ## 8. File-based routing
 

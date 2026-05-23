@@ -1,6 +1,6 @@
 # Resuma bundle benchmark
 
-Measure initial JavaScript for a resumable counter page vs typical hydration setups.
+Measure initial JavaScript for a resumable counter page.
 
 ## Quick check
 

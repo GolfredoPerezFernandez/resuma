@@ -44,7 +44,7 @@ pub fn page(_req: FlowRequest) -> View {
                 </a>
                 <a href="/docs/architecture" class="card" style="text-decoration: none;">
                     <h3>"Architecture"</h3>
-                    <p>"How resumability works — no hydration."</p>
+                    <p>"Resumability vs hydration — how the SSR payload works."</p>
                 </a>
                 <a href="/docs/project_structure" class="card" style="text-decoration: none;">
                     <h3>"Project structure"</h3>

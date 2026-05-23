@@ -88,21 +88,21 @@ fn Counter() -> View {
             </section>
 
             <section class="section">
-                <h2 class="section-title">"Compare"</h2>
+                <h2 class="section-title">"Resumability vs hydration"</h2>
                 <table class="compare">
                     <thead>
                         <tr>
                             <th></th>
-                            <th>"Hydration frameworks"</th>
+                            <th>"Classic SSR + hydration"</th>
                             <th>"Resuma"</th>
                         </tr>
                     </thead>
                     <tbody>
-                        <tr><td>"Initial JS"</td><td>"Full app bundle"</td><td class="yes">"~3KB runtime"</td></tr>
-                        <tr><td>"Client execution"</td><td>"Re-run components"</td><td class="yes">"Resume handlers only"</td></tr>
-                        <tr><td>"Islands"</td><td>"Add-on"</td><td class="yes">"First-class #[island]"</td></tr>
-                        <tr><td>"Full-stack"</td><td>"Separate meta-framework"</td><td class="yes">"Flow included"</td></tr>
-                        <tr><td>"Language"</td><td>"JS / WASM"</td><td class="yes">"Native Rust SSR"</td></tr>
+                        <tr><td>"After first paint"</td><td>"Re-run components on the client"</td><td class="yes">"Resume handlers only"</td></tr>
+                        <tr><td>"Initial JS"</td><td>"App bundle scales with UI"</td><td class="yes">"~3KB runtime + lazy chunks"</td></tr>
+                        <tr><td>"Static pages"</td><td>"Often still ship framework JS"</td><td class="yes">"Zero client JS"</td></tr>
+                        <tr><td>"Islands"</td><td>"Manual code splitting"</td><td class="yes">"First-class #[island]"</td></tr>
+                        <tr><td>"Full-stack"</td><td>"Separate routing layer"</td><td class="yes">"Flow built in (one crate)"</td></tr>
                     </tbody>
                 </table>
             </section>

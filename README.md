@@ -20,15 +20,16 @@
 
 Resuma is a from-scratch Rust framework for building modern web apps with **resumability** instead of hydration:
 
-| Feature | Leptos / Yew / Dioxus | **Resuma** |
+## Resumability vs hydration
+
+| Aspect | Classic SSR + hydration | **Resuma** |
 | --- | --- | --- |
-| Render mode | Hydration | **Resumability** |
-| Initial JS bundle | All components | ~3KB runtime |
-| Islands architecture | ❌ | ✅ first-class `#[island]` |
-| Server actions | Partial | `#[server] async fn` + RPC |
-| JS interop | Manual `wasm-bindgen` | **`js!{}` escape hatch** |
-| Templates | RSX / DSL | **JSX-like `view!{}`** without `$` noise |
-| Rust → JS compilation | ❌ | ✅ via `resuma-macros` (rs2js) |
+| Client work after load | Re-run components to attach listeners | **Resume** serialized state and handlers |
+| Initial JS | Grows with app size | ~3KB runtime + lazy chunks |
+| Interactive boundaries | Often manual | First-class `#[island]` |
+| Server RPC | Custom wiring | `#[server] async fn` + built-in endpoint |
+| Handler code on client | Ship framework runtime + app logic | Compile handlers to small JS via rs2js |
+| Templates | Varies | JSX-like `view!{}` — no extra sigils |
 
 The mental model: **components only run on the server**. The browser never re-executes them. Instead, the SSR pass serialises every signal, handler reference and island into the HTML, and the tiny client runtime *resumes* execution lazily — exactly when the user clicks something.
 

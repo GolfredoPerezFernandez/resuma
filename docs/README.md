@@ -14,6 +14,7 @@ Two ways to read the docs:
 | Doc | Topic |
 |-----|--------|
 | [GETTING_STARTED.md](./GETTING_STARTED.md) | Install CLI, templates, first app |
+| [BLOG_RUST_SSR_WITHOUT_HYDRATION.md](./BLOG_RUST_SSR_WITHOUT_HYDRATION.md) | Technical post draft (Showcase / Dev.to / HN) |
 | [ARCHITECTURE.md](./ARCHITECTURE.md) | Resumability, SSR payload, runtime |
 | [PACKAGE.md](./PACKAGE.md) | Crate map (`resuma` umbrella) |
 | [FLOW.md](./FLOW.md) | FlowApp, `#[load]`, `#[submit]`, pages |
