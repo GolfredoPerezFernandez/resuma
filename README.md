@@ -187,8 +187,8 @@ resuma dev
 ```
 
 - **Crate:** [crates.io/crates/resuma](https://crates.io/crates/resuma)
-- **API docs:** [docs.rs/resuma/0.2.1](https://docs.rs/resuma/0.2.1)
-- **Proc-macros:** [docs.rs/resuma-macros/0.2.1](https://docs.rs/resuma-macros/0.2.1)
+- **API docs:** [docs.rs/resuma/0.2.2](https://docs.rs/resuma/0.2.2)
+- **Proc-macros:** [docs.rs/resuma-macros/0.2.2](https://docs.rs/resuma-macros/0.2.2)
 
 Library only (no CLI binary):
 

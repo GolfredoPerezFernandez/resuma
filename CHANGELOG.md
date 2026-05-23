@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file.
 
 Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [0.2.2] - 2026-05-23
+
+### Changed
+
+- Docs frame Resuma as **resumability vs hydration** — no third-party framework comparisons
+- Showcase post draft: `docs/BLOG_RUST_SSR_WITHOUT_HYDRATION.md` (r/rust / Show HN templates)
+- Architecture and landing pages updated on the docs site
+
 ## [0.2.1] - 2026-05-23
 
 ### Changed
@@ -42,6 +50,7 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - Examples: counter, todo (backend security reference), flow-demo, flow-pages, website
 - Documentation site and markdown guides under `docs/`
 
+[0.2.2]: https://github.com/GolfredoPerezFernandez/resuma/releases/tag/v0.2.2
 [0.2.1]: https://github.com/GolfredoPerezFernandez/resuma/releases/tag/v0.2.1
 [0.2.0]: https://github.com/GolfredoPerezFernandez/resuma/releases/tag/v0.2.0
 [0.1.1]: https://github.com/GolfredoPerezFernandez/resuma/releases/tag/v0.1.1
