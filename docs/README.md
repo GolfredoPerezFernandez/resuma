@@ -30,9 +30,10 @@ Full table on the docs site: **`/docs/examples`**
 cargo run -p example-todo        # Full showcase + backend security
 cargo run -p example-flow-demo   # Loaders + streaming
 cargo run -p example-flow-pages  # File-based routing
-cargo run -p example-website     # This docs site
 cargo run -p example-counter     # Minimal counter
 ```
+
+Docs site: `cargo run -p example-website` (source in `apps/docs-site`, not a public example crate).
 
 ## Docs site map
 

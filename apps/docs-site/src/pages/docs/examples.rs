@@ -5,9 +5,16 @@ pub fn page(_req: FlowRequest) -> View {
         <>
             <h1>"Examples"</h1>
             <p class="lead">
-                "Runnable crates in the repo — clone and run with "
+                "Runnable crates in "
+                <code>"examples/"</code> " — clone and run with "
                 <code>"cargo run -p PACKAGE"</code>". All listen on "
                 <code>"http://127.0.0.1:3000"</code> " by default."
+            </p>
+            <p>
+                "Documentation is served at "
+                <a href="https://resuma-docs.fly.dev/" target="_blank">"resuma-docs.fly.dev"</a>
+                " (source in "
+                <code>"apps/docs-site"</code>", not an example crate)."
             </p>
 
             <table class="docs-table">
@@ -59,16 +66,6 @@ pub fn page(_req: FlowRequest) -> View {
                             <a href="/docs/flow/pages">"Docs →"</a>
                         </td>
                     </tr>
-                    <tr>
-                        <td><strong>"website"</strong></td>
-                        <td><code>"cargo run -p example-website"</code></td>
-                        <td>"FlowApp"</td>
-                        <td>
-                            "This documentation site. Deployed at "
-                            <a href="https://resuma-docs.fly.dev/" target="_blank">"resuma-docs.fly.dev"</a>". "
-                            <a href="/docs/cookbook/docker">"Deploy →"</a>
-                        </td>
-                    </tr>
                 </tbody>
             </table>
 
@@ -76,8 +73,9 @@ pub fn page(_req: FlowRequest) -> View {
             <ul>
                 <li><strong>"Learning Resuma?"</strong>" → " <code>"counter"</code> " then " <code>"todo"</code></li>
                 <li><strong>"Production backend patterns?"</strong>" → " <code>"todo"</code> " + " <a href="/docs/security">"Security docs"</a></li>
-                <li><strong>"Multi-page site?"</strong>" → " <code>"flow-pages"</code> " or " <code>"website"</code></li>
+                <li><strong>"Multi-page site?"</strong>" → " <code>"flow-pages"</code> " or " <code>"resuma new --template flow"</code></li>
                 <li><strong>"Streaming / loaders?"</strong>" → " <code>"flow-demo"</code></li>
+                <li><strong>"Full-stack + SQL?"</strong>" → " <code>"resuma new --template flow-fullstack"</code></li>
             </ul>
 
             <h2>"CLI templates"</h2>

@@ -25,18 +25,17 @@ pub fn page(_req: FlowRequest) -> View {
                 )}
                 {playground_card(
                     "Flow demo (full-stack)",
-                    "Loads, submits, streaming SSR, and file-based pages.",
+                    "Loads, submits, streaming SSR, and deferred chunks.",
                     "cargo run -p example-flow-demo",
-                )}
-                {playground_card(
-                    "This docs site",
-                    "Static landing (0 JS) + interactive docs pages.",
-                    "cargo run -p example-website",
                 )}
             </div>
             <p>
-                "Open " <a href="http://127.0.0.1:3000">"http://127.0.0.1:3000"</a>
-                " and inspect the Network tab — static pages ship zero client JS."
+                "Docs are live at "
+                <a href="https://resuma-docs.fly.dev/" target="_blank">"resuma-docs.fly.dev"</a>
+                ". To hack on the docs site locally: "
+                <code>"cargo run -p example-website"</code> " (source in "
+                <code>"apps/docs-site"</code>", not under "
+                <code>"examples/"</code>")."
             </p>
 
             <h2>"Prerequisites"</h2>

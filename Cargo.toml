@@ -7,7 +7,7 @@ members = [
     "examples/todo",
     "examples/flow-demo",
     "examples/flow-pages",
-    "examples/website",
+    "apps/docs-site",
 ]
 
 [workspace.package]

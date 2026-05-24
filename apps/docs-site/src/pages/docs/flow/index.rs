@@ -63,7 +63,7 @@ pub fn page(_req: FlowRequest) -> View {
     .serve(FlowServeOptions::default())
     .await"#)}
 
-            <p>"Examples: " <a href="/docs/examples">"flow-pages"</a> ", " <a href="/docs/examples">"flow-demo"</a> ", " <a href="/docs/examples">"website"</a>"."</p>
+            <p>"Examples: " <a href="/docs/examples">"flow-pages"</a> ", " <a href="/docs/examples">"flow-demo"</a>"."</p>
         </>
     }
 }

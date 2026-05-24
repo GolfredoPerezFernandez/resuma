@@ -56,7 +56,7 @@ pub fn page(_req: FlowRequest) -> View {
                 </a>
                 <a href="/docs/examples" class="card" style="text-decoration: none;">
                     <h3>"Examples"</h3>
-                    <p>"Runnable crates: todo, counter, flow-demo, website."</p>
+                    <p>"Runnable crates: todo, counter, flow-demo, flow-pages."</p>
                 </a>
                 <a href="/docs/cli" class="card" style="text-decoration: none;">
                     <h3>"CLI"</h3>

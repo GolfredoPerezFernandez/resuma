@@ -29,9 +29,8 @@
 |-------|---------|-------|
 | `flow-pages` | `cargo run -p example-flow-pages` | File routing, layouts |
 | `flow-demo` | `cargo run -p example-flow-demo` | Loaders, streaming |
-| `website` | `cargo run -p example-website` | Full docs site |
 
-See [docs/README.md](./README.md) for all examples.
+Docs site source lives in `apps/docs-site` (not under `examples/`). See [docs/README.md](./README.md).
 
 ## Bootstrap
 

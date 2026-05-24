@@ -6,6 +6,7 @@ WORKDIR /app
 
 COPY Cargo.toml Cargo.lock rust-toolchain.toml ./
 COPY crates ./crates
+COPY apps ./apps
 COPY examples ./examples
 COPY runtime ./runtime
 
@@ -20,7 +21,7 @@ RUN apt-get update \
 
 WORKDIR /app
 COPY --from=builder /app/target/release/website /app/website
-COPY --from=builder /app/examples/website/src/pages /app/pages
+COPY --from=builder /app/apps/docs-site/src/pages /app/pages
 RUN chown -R resuma:resuma /app
 
 USER resuma

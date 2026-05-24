@@ -4,7 +4,7 @@ target/
 **/node_modules/
 runtime/node_modules/
 **/*.md
-!examples/website/src/pages/**/*.rs
+!apps/docs-site/src/pages/**/*.rs
 .cursor/
 agent-transcripts/
 terminals/

@@ -160,16 +160,17 @@ Resuma/
 ├── crates/
 │   ├── resuma/             # single runtime crate (core, ssr, server, flow, cli)
 │   └── resuma-macros/      # proc-macros + rs2js (required separate crate)
+├── apps/
+│   └── docs-site/          # documentation site (apps/docs-site, not a public example)
 ├── runtime/                # TypeScript source for the ~3KB client runtime
-└── examples/
+└── examples/               # runnable learning examples
     ├── counter/
     ├── todo/
     ├── flow-demo/
-    ├── flow-pages/
-    └── website/            # docs site
+    └── flow-pages/
 ```
 
-**Docs:** [`docs/README.md`](docs/README.md) · live site: `cargo run -p example-website`
+**Docs:** [`docs/README.md`](docs/README.md) · live: [resuma-docs.fly.dev](https://resuma-docs.fly.dev) · local: `cargo run -p example-website`
 
 ## Getting started
 
