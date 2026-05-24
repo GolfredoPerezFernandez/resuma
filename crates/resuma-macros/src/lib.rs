@@ -1,12 +1,17 @@
 //! Resuma procedural macros.
 //!
-//! These macros are the surface area Resuma exposes to user code:
+//! Re-exported by the [`resuma`](https://docs.rs/resuma) crate. Typical surface:
 //!
-//!   * [`view!`]        — JSX-like template syntax that builds a `View` tree.
-//!   * [`#[component]`] — turns a function into a Resuma component.
-//!   * [`#[server]`]    — exposes an async fn as a server action / RPC.
-//!   * [`#[island]`]    — marks an interactive island (its handlers ship to JS).
-//!   * [`js!`]          — escape hatch for raw JavaScript handler bodies.
+//! | Macro | Role |
+//! |-------|------|
+//! | [`view!`] | JSX-like templates → [`View`](https://docs.rs/resuma/latest/resuma/enum.View.html) |
+//! | [`#[component]`](component) | Resumable component + props builder (lazy handler boundary) |
+//! | [`#[server]`](server) | Async RPC at `POST /_resuma/action/:name` |
+//! | [`computed!`](computed) | Client-replayable derived signal (rs2js) |
+//! | [`effect!`](effect) | Client-replayable side effect (rs2js) |
+//! | [`debounce!`](debounce) | Debounced client reaction |
+//! | [`#[island]`](island) | Optional heavy lazy boundary (`load = "visible"`) |
+//! | [`js!`](js) | Raw JavaScript handler escape hatch |
 
 mod component_macro;
 mod computed_macro;
@@ -30,7 +35,10 @@ pub fn view(input: TokenStream) -> TokenStream {
     view_macro::expand(input.into()).into()
 }
 
-/// `#[component]` — registers a function as a Resuma component.
+/// `#[component]` — resumable component with generated props builder.
+///
+/// Wraps output in a lazy handler boundary; event handlers register under
+/// `/_resuma/handler/{ComponentName}.js`. For heavy optional lazy bundles, see [`island`].
 #[proc_macro_attribute]
 pub fn component(args: TokenStream, input: TokenStream) -> TokenStream {
     component_macro::expand(args.into(), input.into()).into()
@@ -42,7 +50,10 @@ pub fn server(args: TokenStream, input: TokenStream) -> TokenStream {
     server_macro::expand(args.into(), input.into()).into()
 }
 
-/// `#[island]` — marks a component as an interactive island.
+/// `#[island]` — optional interactive boundary for heavy or visibility-gated JS.
+///
+/// Most UI only needs [`component`]. Use islands for large client bundles,
+/// `#[island(load = "visible")]`, or dev HMR refresh via `GET /_resuma/island/:instance`.
 #[proc_macro_attribute]
 pub fn island(args: TokenStream, input: TokenStream) -> TokenStream {
     island_macro::expand(args.into(), input.into()).into()
@@ -78,7 +89,10 @@ pub fn js(input: TokenStream) -> TokenStream {
     js_macro::expand(input.into()).into()
 }
 
-/// `computed!` / `use_computed!` — client-replayable derived signal (rs2js-translated).
+/// `computed!([deps…], move || …)` — derived signal with client replay (rs2js-translated).
+///
+/// Runs during SSR and replays in the browser when dependencies change.
+/// For SSR-only derived state, use [`use_computed`](https://docs.rs/resuma/latest/resuma/fn.use_computed.html) instead.
 #[proc_macro]
 pub fn computed(input: TokenStream) -> TokenStream {
     computed_macro::expand(input.into()).into()
@@ -90,10 +104,10 @@ pub fn effect(input: TokenStream) -> TokenStream {
     effect_macro::expand(input.into()).into()
 }
 
-/// `debounce!` — debounced client reaction to a signal.
+/// `debounce!([deps…], ms, move || …)` — debounced client reaction (rs2js-translated).
 ///
 /// ```ignore
-/// debounce!(query, 300, move |q| filter.set(q));
+/// debounce!([search], 300, move || { /* runs after search settles */ });
 /// ```
 #[proc_macro]
 pub fn debounce(input: TokenStream) -> TokenStream {

@@ -4,6 +4,15 @@ All notable changes to this project will be documented in this file.
 
 Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [0.3.1] - 2026-05-24
+
+### Changed
+
+- **docs.rs:** crate-level quick start, v0.3 resumability model, expanded `prelude` and module docs
+- Document `ResumePayload`, `for_client()`, `ServeOptions::from_env`, `page_with_request`
+- Fix `computed!` docs (remove obsolete `use_computed!` reference)
+- `#[component]` / `#[island]` macro docs aligned with resumability-first model
+
 ## [0.3.0] - 2026-05-23
 
 Major release since v0.2.2: resumability-first model, client effect replay, dev tooling, and Flow improvements.
@@ -96,6 +105,7 @@ Major release since v0.2.2: resumability-first model, client effect replay, dev 
 - Examples: counter, todo (backend security reference), flow-demo, flow-pages, website
 - Documentation site and markdown guides under `docs/`
 
+[0.3.1]: https://github.com/GolfredoPerezFernandez/resuma/releases/tag/v0.3.1
 [0.3.0]: https://github.com/GolfredoPerezFernandez/resuma/releases/tag/v0.3.0
 [0.2.3]: https://github.com/GolfredoPerezFernandez/resuma/releases/tag/v0.2.3
 [0.2.2]: https://github.com/GolfredoPerezFernandez/resuma/releases/tag/v0.2.2

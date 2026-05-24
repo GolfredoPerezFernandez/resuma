@@ -30,7 +30,14 @@ use super::security::{
     random_token, request_is_https, CspNonce, SecurityConfig, SecurityHeaderOptions,
 };
 
-/// User-facing builder.
+/// HTTP application builder for single-page and manual-route apps.
+///
+/// Register routes with [`page`](Self::page) or [`page_with_request`](Self::page_with_request)
+/// (the latter receives [`FlowRequest`] — query, headers, method). Mount the axum router with
+/// [`serve`](Self::serve).
+///
+/// Built-in endpoints include `/_resuma/loader.js`, `/_resuma/handler/:chunk.js`, and
+/// `POST /_resuma/action/:name` for [`#[server]`](crate::server) actions.
 pub struct ResumaApp {
     page_factories: HashMap<String, Arc<PageFactory>>,
     handler_chunks: Arc<RwLock<HashMap<String, String>>>,
@@ -45,6 +52,10 @@ pub struct ResumaApp {
 type PageFactory = dyn Fn(FlowRequest) -> View + Send + Sync;
 type FallbackFactory = dyn Fn(&str, FlowRequest) -> Option<View> + Send + Sync;
 
+/// Listen options for [`ResumaApp::serve`].
+///
+/// [`Default`] and [`Self::from_env`] read `RESUMA_ADDR` or `HOST` + `PORT`
+/// (defaults to `127.0.0.1:3000`). Security settings come from [`SecurityConfig::from_env`].
 #[derive(Debug, Clone)]
 pub struct ServeOptions {
     pub addr: SocketAddr,
@@ -131,7 +142,9 @@ impl ResumaApp {
         self
     }
 
-    /// Register a page route. The factory receives per-request HTTP context.
+    /// Register a page route with per-request HTTP context (query, headers, method).
+    ///
+    /// Prefer this over [`page`](Self::page) when the handler reads `FlowRequest` fields.
     pub fn page_with_request<F>(mut self, path: &str, factory: F) -> Self
     where
         F: Fn(FlowRequest) -> View + Send + Sync + 'static,

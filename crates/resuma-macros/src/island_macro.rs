@@ -1,4 +1,7 @@
-//! `#[island]` — interactive boundary with optional lazy load policy.
+//! `#[island]` — optional boundary for heavy lazy JS or `load = "visible"`.
+//!
+//! Default resumability comes from [`component`](crate::component_macro). Use islands when
+//! you need a separate chunk, visibility-gated load, or dev HMR via `/_resuma/island/:instance`.
 
 use proc_macro2::TokenStream;
 use quote::quote;

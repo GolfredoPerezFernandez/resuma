@@ -1,20 +1,23 @@
 //! Resuma HTTP server.
 //!
-//! Built on top of `axum`. Apps interact with this crate by:
+//! Built on **axum**. Typical flow:
 //!
-//!   1. Building a [`ResumaApp`] with [`ResumaApp::new`].
-//!   2. Mounting page routes via [`ResumaApp::page`] / [`ResumaApp::route`].
-//!   3. Spawning the HTTP listener with [`ResumaApp::serve`].
+//!   1. [`ResumaApp::new`]
+//!   2. [`ResumaApp::page`] / [`ResumaApp::page_with_request`]
+//!   3. [`ResumaApp::serve`] with [`ServeOptions::from_env`]
 //!
-//! The server provides the following built-in routes:
+//! ## Built-in routes
 //!
-//!   * `GET  /_resuma/loader.js`                — tiny event bootstrap (~1–2 KB).
-//!   * `GET  /_resuma/core.js`                  — lazy-loaded resumability core.
-//!   * `GET  /_resuma/runtime.js`               — legacy monolithic runtime.
-//!   * `POST /_resuma/action/:name`             — invokes a `#[server]` action.
-//!   * `GET  /_resuma/handler/:chunk.js`        — handler chunk lazy-loaded by the runtime.
-//!   * `GET  /_resuma/island-chunk/:chunk.js`   — island chunk loader.
-//!   * `GET  /_resuma/island/:instance`         — re-rendered island HTML (dev HMR).
+//! | Route | Purpose |
+//! |-------|---------|
+//! | `GET /_resuma/loader.js` | Tiny bootstrap (~884 B gzip) |
+//! | `GET /_resuma/core.js` | Lazy-loaded resumability core |
+//! | `GET /_resuma/runtime.js` | Legacy monolithic runtime |
+//! | `GET /_resuma/handler/:chunk.js` | Lazy handler chunk (`#[component]` boundaries) |
+//! | `GET /_resuma/island-chunk/:chunk.js` | Optional `#[island]` chunk |
+//! | `GET /_resuma/island/:instance` | Cached island HTML (dev HMR refresh) |
+//! | `GET /_resuma/dev/ws` | Dev WebSocket when `RESUMA_DEV=1` |
+//! | `POST /_resuma/action/:name` | [`#[server]`](crate::server) RPC |
 
 pub mod actions;
 pub mod app;

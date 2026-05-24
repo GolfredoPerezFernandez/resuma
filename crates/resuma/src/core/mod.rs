@@ -1,16 +1,18 @@
 //! Resuma Core
 //!
 //! Core primitives shared by the framework:
-//!  * `Signal<T>` / `ReadSignal<T>` / `WriteSignal<T>` — fine grained reactive state.
-//!  * `Effect` / `Computed<T>` — automatic dependency tracking.
-//!  * `View` — the resumable virtual node tree returned by components.
-//!  * `Component` — trait implemented by every renderable unit.
-//!  * `RenderContext` — collects state, handlers and islands during SSR so the
-//!    runtime can resume execution on the client without re-running components.
 //!
-//! The big idea: components are *only* executed on the server. Their reactive
-//! dependencies, event handler references and serialized state travel inside
-//! the HTML payload. A tiny JS runtime then resumes execution, no hydration.
+//! * [`Signal`](signal::Signal) / [`ReadSignal`](signal::ReadSignal) / [`WriteSignal`](signal::WriteSignal) —
+//!   fine-grained reactive state serialized into the resumability payload.
+//! * [`Effect`](effect::Effect) / [`Computed`](effect::Computed) — SSR dependency tracking.
+//!   For **client replay**, use the [`computed!`](crate::computed) and [`effect!`](crate::effect) macros.
+//! * [`View`](view::View) — the virtual node tree returned by components.
+//! * [`RenderContext`](context::RenderContext) — collects signals, handlers, and [`ResumePayload`]
+//!   during SSR so the runtime can resume without re-running components.
+//!
+//! Every [`#[component]`](crate::component) wraps its output in a lazy handler boundary
+//! (`<resuma-boundary>`). Handler JS is fetched from `/_resuma/handler/{Component}.js` unless
+//! inlined under the 256-byte `__page__` threshold ([`INLINE_HANDLER_MAX_BYTES`](context::INLINE_HANDLER_MAX_BYTES)).
 
 pub mod app_context;
 pub mod component;

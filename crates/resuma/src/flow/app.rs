@@ -27,7 +27,10 @@ struct PageEntry {
     layouts: Vec<String>,
 }
 
-/// Full-stack Resuma application with pages, layouts, loads, and submits.
+/// Full-stack application: pages, layouts, server loads, form submits, and middleware.
+///
+/// Wraps [`ResumaApp`](crate::server::ResumaApp). Call [`serve`](Self::serve) with
+/// [`FlowServeOptions::from_env`] on Fly.io, Docker, or local dev.
 pub struct FlowApp {
     inner: ResumaApp,
     pages: HashMap<String, PageEntry>,
@@ -36,6 +39,9 @@ pub struct FlowApp {
     pwa: Option<super::pwa::FlowPwaConfig>,
 }
 
+/// Listen and security options for [`FlowApp::serve`].
+///
+/// [`Default`] delegates to [`Self::from_env`] (`RESUMA_ADDR` or `HOST` + `PORT`).
 #[derive(Debug, Clone)]
 pub struct FlowServeOptions {
     pub addr: SocketAddr,

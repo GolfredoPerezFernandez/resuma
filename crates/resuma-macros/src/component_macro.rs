@@ -1,18 +1,15 @@
-//! `#[component]` — turns an `fn` into a Resuma component.
+//! `#[component]` — resumable component with generated props builder.
 //!
-//! For a function:
+//! Each component is a lazy handler boundary. Handlers ship to
+//! `/_resuma/handler/{Name}.js` unless inlined in the page payload.
 //!
 //! ```ignore
 //! #[component]
-//! fn Counter(start: i32) -> View { ... }
+//! fn Counter(start: i32) -> View {
+//!     let n = use_signal(start);
+//!     view! { <button onClick={move |_| n.update(|v| *v + 1)}>{n}</button> }
+//! }
 //! ```
-//!
-//! we generate:
-//!
-//! 1. A `CounterProps` builder struct exposing fluent setters used by the
-//!    `view!` macro when invoking `<Counter start={5} />`.
-//! 2. A unit struct `Counter` implementing `Component`.
-//! 3. A `fn Counter(props) -> View` that re-exports the original body.
 
 use proc_macro2::{Span, TokenStream};
 use quote::{format_ident, quote};

@@ -1,9 +1,12 @@
 //! Effects and computed values.
 //!
-//! Effects re-execute when any of the signals they depend on change.
-//! SSR always runs effects once. When a client JS body is registered (via
-//! [`use_computed_with_js`] or the `computed!` / `debounce!` macros), the
-//! runtime replays them in the browser when dependencies change.
+//! | API | SSR | Client replay |
+//! |-----|-----|---------------|
+//! | [`use_effect`] / [`use_computed`] | yes | no |
+//! | [`computed!`](crate::computed) / [`effect!`](crate::effect) / [`debounce!`](crate::debounce) | yes | yes (rs2js) |
+//!
+//! SSR always runs effects once to capture derived state. When a client JS body is registered
+//! (via [`use_computed_with_js`] or the macros), the runtime replays them when dependencies change.
 
 use std::collections::BTreeMap;
 use std::sync::Arc;

@@ -1,10 +1,61 @@
 //! # Resuma
 //!
-//! The first Rust web framework with **SSR + Resumability + Islands +
-//! Server Actions + a friendly JS bridge** — all in one crate.
+//! **SSR + resumability for Rust** — components run on the server only; the browser
+//! resumes serialized signals and lazy handler chunks instead of re-hydrating the tree.
 //!
-//! Internal layout: `core`, `ssr`, `server`, `router`, `flow`, and optional `cli`.
-//! Users typically depend on this crate only; `resuma-macros` is a separate proc-macro crate.
+//! ## Quick start
+//!
+//! ```no_run
+//! use resuma::prelude::*;
+//!
+//! #[component]
+//! fn Counter() -> View {
+//!     let n = use_signal(0);
+//!     view! {
+//!         <button onClick={move |_| n.update(|v| *v += 1)}>{n}</button>
+//!     }
+//! }
+//!
+//! #[tokio::main]
+//! async fn main() -> std::io::Result<()> {
+//!     ResumaApp::new()
+//!         .page("/", || Counter::render(CounterProps::default()))
+//!         .serve(ServeOptions::default())
+//!         .await
+//! }
+//! ```
+//!
+//! Install the CLI: `cargo install resuma`. Narrative guides live at
+//! [resuma-docs.fly.dev](https://resuma-docs.fly.dev/docs).
+//!
+//! ## Resumability model (v0.3)
+//!
+//! * Every [`#[component]`](component) is a **resumable boundary** — handlers register
+//!   under `/_resuma/handler/{Component}.js` and prefetch when the boundary enters the viewport.
+//! * [`computed!`](computed), [`effect!`](effect), and [`debounce!`](debounce) translate Rust
+//!   closures to client-replayable JS via rs2js (in `resuma-macros`).
+//! * Plain [`use_computed`](core::use_computed) / [`use_effect`](core::use_effect) run on SSR only;
+//!   use the macros when the browser must replay derived state or side effects.
+//! * [`#[island]`](island) is **optional** — for heavy lazy bundles, `load = "visible"`, or dev HMR.
+//!
+//! ## Crate layout
+//!
+//! | Module | Role |
+//! |--------|------|
+//! | [`core`] | Signals, `View`, [`RenderContext`], [`ResumePayload`] |
+//! | [`ssr`] | HTML rendering + embedded resumability payload |
+//! | [`server`] | axum HTTP, `ResumaApp`, `/_resuma/*` assets |
+//! | [`flow`] | `FlowApp`, file-based pages, `#[load]`, `#[submit]` |
+//! | [`router`] | Page discovery scanner |
+//! | [`cli`] | `resuma new` / `dev` / `build` (feature `cli`) |
+//!
+//! Users depend on **`resuma`** only; [`resuma-macros`](https://docs.rs/resuma-macros) is a separate
+//! proc-macro crate required by the build.
+//!
+//! ## Re-exports
+//!
+//! Most apps start with [`prelude`] (`use resuma::prelude::*`). Macros (`view!`, `#[component]`,
+//! `#[server]`, Flow attributes) and common types are re-exported at the crate root for convenience.
 
 pub mod core;
 pub mod flow;
@@ -26,8 +77,8 @@ pub use crate::core::{
     use_context, use_debounce, use_effect, use_signal, use_store, use_task, use_theme,
     use_visible_task, visible_task_js, with_default_slot, with_view_transition, Child, Component,
     Computed, ContextId, Effect, FlowRequest, IntoView, NoSerialize, ReadSignal, RenderContext,
-    RenderMode, Result, ResumaError, Signal, SlotGuard, SlottedChild, Store, Theme, View,
-    WriteSignal,
+    RenderMode, Result, ResumaError, ResumePayload, Signal, SlotGuard, SlottedChild, Store, Theme,
+    View, WriteSignal,
 };
 
 pub use crate::server::{
@@ -53,7 +104,26 @@ pub fn run() -> anyhow::Result<()> {
 }
 
 pub mod prelude {
-    //! Glob-friendly re-exports.
+    //! Convenient re-exports for application code.
+    //!
+    //! ```rust,ignore
+    //! use resuma::prelude::*;
+    //! ```
+    //!
+    //! Includes:
+    //!
+    //! * **Macros** — [`view!`](crate::view), [`#[component]`](crate::component),
+    //!   [`#[server]`](crate::server), [`computed!`](crate::computed),
+    //!   [`effect!`](crate::effect), [`debounce!`](crate::debounce), Flow (`#[load]`, `#[submit]`, …)
+    //! * **Components** — [`View`](crate::View), [`Signal`](crate::Signal), [`Component`](crate::Component)
+    //! * **Apps** — [`ResumaApp`](crate::ResumaApp), [`FlowApp`](crate::FlowApp),
+    //!   [`ServeOptions`](crate::ServeOptions), [`FlowServeOptions`](crate::FlowServeOptions)
+    //! * **SSR** — [`render_to_string`](crate::render_to_string), [`render_view`](crate::render_view)
+    //! * **Flow runtime** — [`FlowRequest`](crate::FlowRequest), [`current_request`](crate::current_request),
+    //!   [`use_load`](crate::use_load), [`form`](crate::form)
+    //!
+    //! For low-level types ([`RenderContext`](crate::RenderContext), [`ResumePayload`](crate::ResumePayload)),
+    //! import from [`crate::core`].
     pub use super::{
         combine_js, component, computed, configure_security, current_request, debounce, effect,
         error_page, form, island, js, layout, load, middleware, nav_link, not_found_page, portal,

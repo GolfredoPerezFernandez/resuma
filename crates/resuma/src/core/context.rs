@@ -236,7 +236,10 @@ impl RenderContext {
 }
 
 impl ResumePayload {
-    /// Strip external handler JS from the client payload (lazy-fetched by chunk id).
+    /// Strip external handler JS from the payload sent to the browser.
+    ///
+    /// Keeps only `__page__` handlers under [`INLINE_HANDLER_MAX_BYTES`].
+    /// All other chunk sources are served from `/_resuma/handler/:chunk.js`.
     pub fn for_client(&self) -> Self {
         let mut client = self.clone();
         let mut inline_page = BTreeMap::new();
@@ -279,7 +282,20 @@ pub struct ClientEffectSpec {
     pub debounce_ms: Option<u64>,
 }
 
-/// The JSON blob that travels in `<script type="resuma/state">…</script>`.
+/// The JSON blob embedded in `<script type="resuma/state">…</script>`.
+///
+/// Built by [`RenderContext::snapshot`] during SSR. The client-facing version
+/// ([`for_client`](Self::for_client)) strips external handler sources; chunk ids
+/// appear in [`lazy_chunks`](Self::lazy_chunks) and load from `/_resuma/handler/:chunk.js`.
+///
+/// # Fields
+///
+/// * `signals` — serialized [`SignalSnapshot`](SignalSnapshot) values
+/// * `handlers` — inline handler JS (typically small `__page__` handlers only)
+/// * `lazy_chunks` — component/island chunk ids prefetched or fetched on demand
+/// * `effects` — client-replay specs from `computed!` / `effect!` / `debounce!`
+/// * `islands` — optional `#[island]` instances on the page
+/// * `actions` — `#[server]` action names referenced by handlers
 #[derive(Debug, Clone, Serialize)]
 pub struct ResumePayload {
     pub signals: Vec<SignalSnapshot>,

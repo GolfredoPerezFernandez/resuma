@@ -1,3 +1,9 @@
+//! Resuma Flow — full-stack pages, loaders, submits, and middleware on top of [`ResumaApp`](crate::server::ResumaApp).
+//!
+//! Use [`FlowApp`] for multi-page sites with `src/pages/`, [`#[load]`](crate::load),
+//! [`#[submit]`](crate::submit), and [`#[layout]`](crate::layout). File-based routing is
+//! discovered via [`discover_pages`] or `FlowApp::auto_pages`.
+
 pub mod action_hook;
 pub mod app;
 pub mod cache;
