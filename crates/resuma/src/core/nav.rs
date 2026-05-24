@@ -35,6 +35,10 @@ pub fn nav_link(
                 name: "data-r-nav".into(),
                 value: AttrValue::Static("true".into()),
             },
+            Attr {
+                name: "data-r-active-class".into(),
+                value: AttrValue::Static(active_class.clone()),
+            },
         ],
         children,
         dom_id: None,

@@ -12,6 +12,7 @@ use axum::Router;
 use std::net::SocketAddr;
 
 use super::middleware::run_middleware;
+use super::redirect::{extract_redirect, redirect_response};
 use super::registry::dispatch_submit;
 use super::submit::SubmitError;
 use crate::server::{guard_mutation, http_status, security::config, CSRF_FIELD};
@@ -23,6 +24,8 @@ pub struct SubmitResponse {
     pub error: Option<String>,
     #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
     pub field_errors: BTreeMap<String, String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub redirect: Option<String>,
 }
 
 #[derive(Debug, Clone, Default)]
@@ -99,14 +102,18 @@ pub async fn handle_submit(
 
     match dispatch_submit(&name, data, req).await {
         Ok(value) => {
+            let redirect = extract_redirect(&value);
             if wants_json {
                 axum::Json(SubmitResponse {
                     ok: true,
                     value: Some(value),
                     error: None,
                     field_errors: BTreeMap::new(),
+                    redirect,
                 })
                 .into_response()
+            } else if let Some(loc) = redirect {
+                redirect_response(&loc)
             } else {
                 let html = render_to_string(
                     &PageOptions {
@@ -127,6 +134,7 @@ pub async fn handle_submit(
                     value: None,
                     error: Some(message),
                     field_errors,
+                    redirect: None,
                 }),
             )
                 .into_response()
@@ -156,6 +164,7 @@ fn submit_error(err: ResumaError, wants_json: bool) -> Response {
                 value: None,
                 error: Some(message),
                 field_errors: BTreeMap::new(),
+                redirect: None,
             }),
         )
             .into_response()

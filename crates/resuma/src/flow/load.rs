@@ -1,5 +1,6 @@
 //! Server-side data loading — `#[load]` handlers run before page render.
 
+use crate::core::view::View;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 
@@ -32,6 +33,20 @@ impl LoaderError {
             status,
             message: message.into(),
         }
+    }
+}
+
+/// Render a `LoadValue` from `#[load]` with explicit pending and error branches.
+pub fn load_boundary<T>(
+    load: LoadValue<T>,
+    ok: impl FnOnce(T) -> View,
+    err: impl FnOnce(LoaderError) -> View,
+    pending: impl FnOnce() -> View,
+) -> View {
+    match load {
+        LoadValue::Ok(v) => ok(v),
+        LoadValue::Err(e) => err(e),
+        LoadValue::Pending => pending(),
     }
 }
 

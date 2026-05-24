@@ -19,12 +19,14 @@ pub mod component;
 pub mod context;
 pub mod effect;
 pub mod error;
+pub mod error_boundary;
 pub mod flow_request;
 pub mod handler;
 pub mod handler_combine;
 pub mod nav;
 pub mod portal;
 pub mod serialize;
+pub mod show;
 pub mod signal;
 pub mod slot;
 pub mod store;
@@ -44,11 +46,13 @@ pub use effect::{
     attach_client_effect, use_computed, use_computed_with_js, use_effect, Computed, Effect,
 };
 pub use error::{Result, ResumaError};
+pub use error_boundary::error_boundary;
 pub use flow_request::FlowRequest;
 pub use handler::{HandlerCapture, HandlerRef, IslandRef, ServerActionRef};
 pub use handler_combine::combine_js;
 pub use nav::nav_link;
 pub use portal::portal;
+pub use show::show;
 pub use signal::{use_signal, ReadSignal, Signal, SignalId, WriteSignal};
 pub use slot::{push_slots, resolve_slot, with_default_slot, SlotGuard, SlottedChild};
 pub use store::{no_serialize, use_store, NoSerialize, Store};

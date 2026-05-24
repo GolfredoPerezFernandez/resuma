@@ -6,6 +6,7 @@ use std::sync::Arc;
 
 use crate::core::view::View;
 use crate::core::{FlowRequest, ResumaError};
+use crate::flow::extract_redirect;
 use crate::ssr::PageOptions;
 use axum::body::Body;
 use axum::extract::ConnectInfo;
@@ -447,6 +448,8 @@ struct ActionResponse {
     ok: bool,
     value: Option<serde_json::Value>,
     error: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    redirect: Option<String>,
 }
 
 async fn serve_action(
@@ -484,15 +487,19 @@ async fn serve_action(
     );
 
     match dispatch_action(&name, body.args, flow_req).await {
-        Ok(value) => (
-            StatusCode::OK,
-            Json(ActionResponse {
-                ok: true,
-                value: Some(value),
-                error: None,
-            }),
-        )
-            .into_response(),
+        Ok(value) => {
+            let redirect = extract_redirect(&value);
+            (
+                StatusCode::OK,
+                Json(ActionResponse {
+                    ok: true,
+                    value: Some(value),
+                    error: None,
+                    redirect,
+                }),
+            )
+                .into_response()
+        }
         Err(err) => action_error(err),
     }
 }
@@ -506,6 +513,7 @@ fn action_error(err: ResumaError) -> Response {
             ok: false,
             value: None,
             error: Some(err.client_message(cfg.production)),
+            redirect: None,
         }),
     )
         .into_response()

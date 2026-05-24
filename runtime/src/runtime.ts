@@ -22,6 +22,7 @@
 import { initSignals, type SignalCell, applyDom, bindReactiveText, bindReactiveAttrs } from "./signals.js";
 import { initIslands } from "./islands.js";
 import { resolveHandler } from "./handler-loader.js";
+import { followRedirect, initNavLinks, remountPage } from "./navigation.js";
 
 interface ResumePayload {
   signals: Array<{ id: { 0: number } | string; value: unknown }>;
@@ -38,6 +39,7 @@ interface ResumaGlobal {
   handlers: Record<string, Record<string, string>>;
   contexts: Record<string, unknown>;
   action: (name: string, args: unknown[]) => Promise<unknown>;
+  safeAction: (name: string, args: unknown[]) => Promise<{ ok: true; value: unknown } | { ok: false; error: string }>;
   loaded: Map<string, Record<string, Function>>;
   refreshIsland: (id: string) => Promise<void>;
   context: (key: string) => unknown;
@@ -67,6 +69,13 @@ function readPayload(): ResumePayload {
 }
 
 function bootstrap(): void {
+  mountCurrentPage();
+  attachEventDelegation();
+  attachFormEnhancement();
+  initNavLinks();
+}
+
+function mountCurrentPage(): void {
   const payload = readPayload();
   const signals = initSignals(payload.signals.map((s) => ({
     id: typeof s.id === "string" ? s.id : `s${(s.id as { 0: number })[0]}`,
@@ -83,6 +92,7 @@ function bootstrap(): void {
     contexts: payload.contexts ?? {},
     loaded: new Map(),
     action: callServerAction,
+    safeAction: callServerActionSafe,
     refreshIsland,
     context: (key: string) => __resuma.contexts[key],
   };
@@ -91,8 +101,6 @@ function bootstrap(): void {
   bindReactiveText(root(), signals);
   bindReactiveAttrs(root(), signals);
   initIslands(root(), signals);
-  attachEventDelegation();
-  attachFormEnhancement();
   applyStreamSlots(root());
   initPortals(root());
   initViewTransitions(root());
@@ -203,6 +211,10 @@ function attachFormEnhancement(): void {
         throw new Error(data.error ?? `submit ${name} failed`);
       }
       clearFieldErrors(form);
+      if (data.redirect) {
+        followRedirect(data.redirect);
+        return;
+      }
       console.info("[resuma] submit ok", data.value);
     } catch (err) {
       console.error("[resuma] submit error", err);
@@ -327,6 +339,19 @@ function runVisibleTasks(tasks: Record<string, string>, state: Record<string, Si
 /*  Server actions                                                     */
 /* ------------------------------------------------------------------- */
 
+async function callServerActionSafe(
+  name: string,
+  args: unknown[],
+): Promise<{ ok: true; value: unknown } | { ok: false; error: string }> {
+  try {
+    const value = await callServerAction(name, args);
+    return { ok: true, value };
+  } catch (err) {
+    const error = err instanceof Error ? err.message : String(err);
+    return { ok: false, error };
+  }
+}
+
 async function callServerAction(name: string, args: unknown[]): Promise<unknown> {
   const res = await fetch(`/_resuma/action/${encodeURIComponent(name)}`, {
     method: "POST",
@@ -336,6 +361,10 @@ async function callServerAction(name: string, args: unknown[]): Promise<unknown>
   if (!res.ok) throw new Error(`[resuma] action ${name} failed: ${res.status}`);
   const data = await res.json();
   if (data.ok === false) throw new Error(data.error ?? "action failed");
+  if (data.redirect) {
+    followRedirect(data.redirect);
+    return data.value;
+  }
   return data.value;
 }
 
@@ -349,7 +378,7 @@ async function refreshIsland(instance: string): Promise<void> {
   const html = await res.text();
   const target = document.querySelector(`resuma-island[data-r-instance="${instance}"]`);
   if (target) target.outerHTML = html;
-  applyDom();
+  remountPage();
 }
 
 /* ------------------------------------------------------------------- */

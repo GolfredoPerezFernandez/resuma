@@ -310,6 +310,8 @@ fn emit_node(node: Node) -> TokenStream {
                 emit_form(attrs, children)
             } else if tag == "NavLink" {
                 emit_nav_link(attrs, children)
+            } else if tag == "Show" {
+                emit_show(attrs, children)
             } else if is_component {
                 emit_component(tag, attrs, children)
             } else {
@@ -439,6 +441,43 @@ fn emit_nav_link(attrs: Vec<Attr>, children: Vec<Node>) -> TokenStream {
     }
 }
 
+fn emit_show(attrs: Vec<Attr>, children: Vec<Node>) -> TokenStream {
+    let mut when = quote! { true };
+    let mut fallback = quote! { None::<::resuma::__private::View> };
+
+    for a in attrs {
+        match a.name.as_str() {
+            "when" => {
+                when = match a.value {
+                    AttrVal::StaticStr(s) => quote!(#s == "true"),
+                    AttrVal::Expr(ts) => quote!({ #ts }),
+                    AttrVal::Bool => quote!(true),
+                };
+            }
+            "fallback" => {
+                fallback = match a.value {
+                    AttrVal::Expr(ts) => quote! { Some({ #ts }) },
+                    AttrVal::StaticStr(s) => {
+                        quote! { Some(::resuma::__private::View::text(#s)) }
+                    }
+                    AttrVal::Bool => quote! { Some(::resuma::__private::View::empty()) },
+                };
+            }
+            _ => {}
+        }
+    }
+
+    let child_pushes = children.into_iter().map(emit_child);
+
+    quote! {
+        ::resuma::__private::show(
+            #when,
+            vec![ #(#child_pushes),* ],
+            #fallback,
+        )
+    }
+}
+
 fn emit_form(attrs: Vec<Attr>, children: Vec<Node>) -> TokenStream {
     let mut submit_name: Option<TokenStream> = None;
     let mut extra_attrs = Vec::new();
@@ -500,6 +539,8 @@ fn emit_slotted_child(node: Node) -> TokenStream {
                 emit_form(attrs, children)
             } else if tag == "NavLink" {
                 emit_nav_link(attrs, children)
+            } else if tag == "Show" {
+                emit_show(attrs, children)
             } else if is_component {
                 emit_component(tag, attrs, children)
             } else {

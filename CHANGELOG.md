@@ -4,6 +4,20 @@ All notable changes to this project will be documented in this file.
 
 Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [0.3.3] - 2026-05-24
+
+### Added
+
+- **Redirects** — `redirect()` / `Redirect` for `#[submit]` and `#[server]`; 303 PRG without JS, JSON `redirect` hint with runtime
+- **NavLink SPA navigation** — client fetches SSR HTML and swaps `#resuma-root` without full reload
+- **`<Show>`** — conditional rendering in `view!` (Leptos-style `when` / `fallback`)
+- **`load_boundary` / `error_boundary`** — explicit loader and Result fallback UI helpers
+- **`__resuma.safeAction()`** — server RPC with `{ ok, value | error }` instead of throw-only
+
+### Changed
+
+- Runtime rebuilt (~10.4 KiB) with navigation module and form/action redirect follow
+
 ## [0.3.2] - 2026-05-24
 
 ### Added
@@ -131,6 +145,7 @@ Major release since v0.2.2: resumability-first model, client effect replay, dev 
 - Examples: counter, todo (backend security reference), flow-demo, flow-pages, website
 - Documentation site and markdown guides under `docs/`
 
+[0.3.3]: https://github.com/GolfredoPerezFernandez/resuma/releases/tag/v0.3.3
 [0.3.2]: https://github.com/GolfredoPerezFernandez/resuma/releases/tag/v0.3.2
 [0.3.1]: https://github.com/GolfredoPerezFernandez/resuma/releases/tag/v0.3.1
 [0.3.0]: https://github.com/GolfredoPerezFernandez/resuma/releases/tag/v0.3.0
