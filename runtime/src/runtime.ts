@@ -31,6 +31,7 @@ interface ResumePayload {
   actions: string[];
   contexts?: Record<string, unknown>;
   visible_tasks?: Record<string, string>;
+  csrf_token?: string;
 }
 
 interface ResumaGlobal {
@@ -66,6 +67,17 @@ function readPayload(): ResumePayload {
     console.error("[resuma] failed to parse state payload", e);
     return { signals: [], handlers: {}, islands: [], actions: [] };
   }
+}
+
+function csrfToken(): string {
+  return readPayload().csrf_token ?? "";
+}
+
+function mutationHeaders(extra: Record<string, string> = {}): Record<string, string> {
+  const headers: Record<string, string> = { ...extra };
+  const token = csrfToken();
+  if (token) headers["x-resuma-csrf"] = token;
+  return headers;
 }
 
 function bootstrap(): void {
@@ -196,10 +208,11 @@ function attachFormEnhancement(): void {
     try {
       const res = await fetch(form.action || `/_resuma/submit/${encodeURIComponent(name)}`, {
         method: "POST",
-        headers: {
+        credentials: "same-origin",
+        headers: mutationHeaders({
           "content-type": "application/x-www-form-urlencoded",
           accept: "application/json",
-        },
+        }),
         body: params.toString(),
       });
       const data = await res.json();
@@ -355,7 +368,8 @@ async function callServerActionSafe(
 async function callServerAction(name: string, args: unknown[]): Promise<unknown> {
   const res = await fetch(`/_resuma/action/${encodeURIComponent(name)}`, {
     method: "POST",
-    headers: { "content-type": "application/json" },
+    credentials: "same-origin",
+    headers: mutationHeaders({ "content-type": "application/json" }),
     body: JSON.stringify({ args }),
   });
   if (!res.ok) throw new Error(`[resuma] action ${name} failed: ${res.status}`);

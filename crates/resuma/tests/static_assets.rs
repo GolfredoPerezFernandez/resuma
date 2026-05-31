@@ -7,6 +7,17 @@ use tower::ServiceExt;
 
 static DEMO_JS: &[u8] = b"export function demo() {}";
 
+#[test]
+fn core_runtime_reads_current_csrf_payload_without_cache() {
+    let source = include_str!("../../../runtime/src/core.ts");
+    let core_js = resuma::server::runtime_asset::CORE_JS;
+
+    assert!(source.contains("payload.csrf_token"));
+    assert!(!source.contains("cachedCsrf"));
+    assert!(core_js.contains("csrf_token"));
+    assert!(core_js.contains("x-resuma-csrf"));
+}
+
 #[tokio::test]
 async fn flow_serves_static_and_client_assets() {
     let app = FlowApp::new()

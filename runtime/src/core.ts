@@ -47,19 +47,15 @@ declare global {
 const STATE_SCRIPT_ID = "resuma-state";
 const ROOT_ID = "resuma-root";
 
-let cachedCsrf: string | null = null;
-
 function csrfToken(): string {
-  if (cachedCsrf) return cachedCsrf;
   const node = document.getElementById(STATE_SCRIPT_ID);
   if (!node?.textContent) return "";
   try {
     const payload = JSON.parse(node.textContent) as ResumePayload;
-    cachedCsrf = payload.csrf_token ?? "";
+    return payload.csrf_token ?? "";
   } catch {
-    cachedCsrf = "";
+    return "";
   }
-  return cachedCsrf;
 }
 
 function mutationHeaders(extra: Record<string, string> = {}): Record<string, string> {
