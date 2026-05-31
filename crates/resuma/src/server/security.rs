@@ -335,7 +335,7 @@ pub fn apply_security_headers(mut response: Response, opts: &SecurityHeaderOptio
         // effects, and visible tasks with `new Function`. Keep CSP honest so
         // enabled Resuma features work under the default security headers.
         let mut policy = format!(
-            "default-src 'self'; script-src 'self' 'nonce-{nonce}' 'unsafe-eval'; style-src 'self' 'nonce-{nonce}'; img-src 'self' data:; font-src 'self'; connect-src 'self'; object-src 'none'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'"
+            "default-src 'self'; script-src 'self' 'nonce-{nonce}' 'unsafe-eval'; style-src 'self' 'nonce-{nonce}' 'unsafe-inline'; style-src-elem 'self' 'nonce-{nonce}'; style-src-attr 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self'; object-src 'none'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'"
         );
         if opts.https {
             policy.push_str("; upgrade-insecure-requests");
@@ -468,5 +468,8 @@ mod tests {
 
         assert!(csp.contains("'nonce-abc123'"));
         assert!(csp.contains("'unsafe-eval'"));
+        assert!(csp.contains("style-src 'self' 'nonce-abc123' 'unsafe-inline'"));
+        assert!(csp.contains("style-src-elem 'self' 'nonce-abc123'"));
+        assert!(csp.contains("style-src-attr 'unsafe-inline'"));
     }
 }
