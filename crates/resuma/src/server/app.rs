@@ -2,9 +2,12 @@
 
 use std::collections::HashMap;
 use std::net::SocketAddr;
+use std::rc::Rc;
 use std::sync::Arc;
 
+use crate::core::context::{with_context, RenderContext, RenderMode};
 use crate::core::view::View;
+use crate::core::Component;
 use crate::core::{FlowRequest, ResumaError};
 use crate::flow::extract_redirect;
 use crate::ssr::PageOptions;
@@ -38,7 +41,7 @@ use super::security::{
 /// [`serve`](Self::serve).
 ///
 /// Built-in endpoints include `/_resuma/loader.js`, `/_resuma/handler/:chunk.js`, and
-/// `POST /_resuma/action/:name` for [`#[server]`](crate::server) actions.
+/// `POST /_resuma/action/:name` for [`#[server]`](macro@crate::server) actions.
 pub struct ResumaApp {
     page_factories: HashMap<String, Arc<PageFactory>>,
     handler_chunks: Arc<RwLock<HashMap<String, String>>>,
@@ -70,7 +73,7 @@ impl Default for ServeOptions {
 }
 
 impl ServeOptions {
-    /// Read bind address from `RESUMA_ADDR` or `HOST` + `PORT` (same as [`FlowServeOptions`]).
+    /// Read bind address from `RESUMA_ADDR` or `HOST` + `PORT` (same as [`crate::FlowServeOptions`]).
     pub fn from_env() -> Self {
         Self {
             addr: super::listen::listen_addr_from_env(),
@@ -161,6 +164,20 @@ impl ResumaApp {
         F: Fn() -> View + Send + Sync + 'static,
     {
         self.page_with_request(path, move |_req| factory())
+    }
+
+    /// Register a no-props component route without spelling
+    /// `Component::render(ComponentProps::default())`.
+    ///
+    /// ```rust,ignore
+    /// ResumaApp::new().component("/", App)
+    /// ```
+    pub fn component<C>(self, path: &str, _component: C) -> Self
+    where
+        C: Component + 'static,
+        C::Props: Default,
+    {
+        self.page(path, || C::render(Default::default()))
     }
 
     /// Catch-all renderer for dynamic routes (Resuma Flow param patterns).
@@ -316,7 +333,13 @@ fn attach_page_security(mut res: Response, opts: &PageOptions, https: bool) -> R
     res
 }
 
-fn render_page_response(state: &AppState, view: View, path: &str, https: bool) -> Response {
+fn render_page_response(
+    state: &AppState,
+    view: View,
+    ctx: Rc<RenderContext>,
+    path: &str,
+    https: bool,
+) -> Response {
     let opts = page_security_opts(&state.page_options);
     super::page_cache::stage_page_csrf(opts.csrf_token.clone());
     let cache = take_response_cache_control();
@@ -324,7 +347,8 @@ fn render_page_response(state: &AppState, view: View, path: &str, https: bool) -
         use axum::body::Body;
         use futures_util::StreamExt;
 
-        let (_, payload) = crate::ssr::render_body_and_payload(&view);
+        let body = crate::ssr::render_view(&view);
+        let payload = ctx.snapshot_full();
         super::handler_assets::merge_payload_handlers(
             &state.handler_chunks,
             &state.island_chunks,
@@ -334,8 +358,7 @@ fn render_page_response(state: &AppState, view: View, path: &str, https: bool) -
         let stream = if let Some(deferred) = try_deferred_stream(view.clone(), &opts, path) {
             deferred
         } else {
-            use crate::ssr::render_to_stream;
-            render_to_stream(&opts, path, move || view)
+            crate::ssr::build_page_stream(opts.clone(), path, body.clone(), payload, vec![body])
         };
 
         let stream = stream.map(|chunk| {
@@ -349,19 +372,23 @@ fn render_page_response(state: &AppState, view: View, path: &str, https: bool) -
         if let Some(ref cache) = cache {
             builder = builder.header(header::CACHE_CONTROL, cache.as_str());
         }
-        let res = builder
+        let res = match builder
             .header("x-robots-tag", "index, follow")
             .body(Body::from_stream(stream))
-            .unwrap();
+        {
+            Ok(res) => res,
+            Err(_) => return StatusCode::INTERNAL_SERVER_ERROR.into_response(),
+        };
         attach_page_security(res, &opts, https)
     } else {
-        let html = crate::ssr::render_document(&opts, path, &view);
+        let payload = ctx.snapshot_full();
+        let html = crate::ssr::render_prebuilt_document(&opts, path, &view, &payload);
         super::handler_assets::merge_payload_handlers(
             &state.handler_chunks,
             &state.island_chunks,
-            &html.1,
+            &payload,
         );
-        let mut res = Html(html.0).into_response();
+        let mut res = Html(html).into_response();
         if let Some(cache) = cache {
             res.headers_mut().insert(
                 header::CACHE_CONTROL,
@@ -385,7 +412,9 @@ async fn serve_page(uri: Uri, State(state): State<Arc<AppState>>, req: Request<B
     };
 
     let flow_req = crate::flow::request::from_http_request(&req, &path, Default::default());
-    render_page_response(&state, factory(flow_req), &path, request_is_https(&req))
+    let ctx = RenderContext::new(RenderMode::Ssr);
+    let view = with_context(ctx.clone(), || factory(flow_req));
+    render_page_response(&state, view, ctx, &path, request_is_https(&req))
 }
 
 async fn serve_fallback(
@@ -396,8 +425,9 @@ async fn serve_fallback(
     let path = uri.path();
     let flow_req = crate::flow::request::from_http_request(&req, path, Default::default());
     if let Some(fb) = &state.fallback {
-        if let Some(view) = fb(path, flow_req) {
-            return render_page_response(&state, view, path, request_is_https(&req));
+        let ctx = RenderContext::new(RenderMode::Ssr);
+        if let Some(view) = with_context(ctx.clone(), || fb(path, flow_req)) {
+            return render_page_response(&state, view, ctx, path, request_is_https(&req));
         }
     }
     (StatusCode::NOT_FOUND, "not found").into_response()

@@ -4,7 +4,7 @@ use axum::http::header;
 use axum::Router;
 use serde::Serialize;
 
-/// Progressive Web App configuration for [`FlowApp::with_pwa`].
+/// Progressive Web App configuration for [`crate::FlowApp::with_pwa`].
 #[derive(Debug, Clone, Serialize)]
 pub struct FlowPwaConfig {
     pub name: String,

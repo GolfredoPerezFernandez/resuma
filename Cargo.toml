@@ -7,10 +7,11 @@ members = [
     "examples/todo",
     "examples/flow-demo",
     "examples/flow-pages",
+    "examples/e2e",
 ]
 
 [workspace.package]
-version = "0.4.0"
+version = "0.4.1"
 edition = "2021"
 rust-version = "1.91"
 authors = ["Resuma Contributors"]
@@ -24,7 +25,7 @@ categories = ["web-programming", "asynchronous"]
 readme = "README.md"
 
 [workspace.dependencies]
-resuma-macros = { path = "crates/resuma-macros", version = "0.4.0" }
+resuma-macros = { path = "crates/resuma-macros", version = "0.4.1" }
 
 # 3rd-party
 serde       = { version = "1", features = ["derive"] }

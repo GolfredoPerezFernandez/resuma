@@ -19,7 +19,7 @@
 //! | `GET /_resuma/island-chunk/:chunk.js` | Optional `#[island]` chunk |
 //! | `GET /_resuma/island/:instance` | Cached island HTML (dev HMR refresh) |
 //! | `GET /_resuma/dev/ws` | Dev WebSocket when `RESUMA_DEV=1` |
-//! | `POST /_resuma/action/:name` | [`#[server]`](crate::server) RPC |
+//! | `POST /_resuma/action/:name` | [`#[server]`](macro@crate::server) RPC |
 
 pub mod actions;
 pub mod app;

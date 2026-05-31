@@ -20,7 +20,7 @@ See [NAMING.md](./NAMING.md) for the full product map.
 
 ```toml
 [dependencies]
-resuma = { version = "0.3", default-features = false }
+resuma = { version = "0.4", default-features = false }
 tokio  = { version = "1", features = ["full"] }
 ```
 

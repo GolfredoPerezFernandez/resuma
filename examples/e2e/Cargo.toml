@@ -1,0 +1,13 @@
+[package]
+name = "example-e2e"
+version.workspace = true
+edition.workspace = true
+publish = false
+
+[[bin]]
+name = "example-e2e"
+path = "src/main.rs"
+
+[dependencies]
+resuma = { path = "../../crates/resuma" }
+tokio  = { workspace = true }

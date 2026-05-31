@@ -2,12 +2,12 @@
 //!
 //! Core primitives shared by the framework:
 //!
-//! * [`Signal`](signal::Signal) / [`ReadSignal`](signal::ReadSignal) / [`WriteSignal`](signal::WriteSignal) —
+//! * [`Signal`] / [`ReadSignal`] / [`WriteSignal`] —
 //!   fine-grained reactive state serialized into the resumability payload.
-//! * [`Effect`](effect::Effect) / [`Computed`](effect::Computed) — SSR dependency tracking.
+//! * [`Effect`] / [`Computed`] — SSR dependency tracking.
 //!   For **client replay**, use the [`computed!`](crate::computed) and [`effect!`](crate::effect) macros.
-//! * [`View`](view::View) — the virtual node tree returned by components.
-//! * [`RenderContext`](context::RenderContext) — collects signals, handlers, and [`ResumePayload`]
+//! * [`View`] — the virtual node tree returned by components.
+//! * [`RenderContext`] — collects signals, handlers, and [`ResumePayload`]
 //!   during SSR so the runtime can resume without re-running components.
 //!
 //! Every [`#[component]`](crate::component) wraps its output in a lazy handler boundary
@@ -53,7 +53,7 @@ pub use handler_combine::combine_js;
 pub use nav::nav_link;
 pub use portal::portal;
 pub use show::show;
-pub use signal::{use_signal, ReadSignal, Signal, SignalId, WriteSignal};
+pub use signal::{signal, use_signal, ReadSignal, Signal, SignalId, WriteSignal};
 pub use slot::{push_slots, resolve_slot, with_default_slot, SlotGuard, SlottedChild};
 pub use store::{no_serialize, use_store, NoSerialize, Store};
 pub use stream::{stream_chunk, stream_slot};

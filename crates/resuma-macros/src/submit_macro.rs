@@ -48,7 +48,13 @@ pub fn expand(_args: TokenStream, input: TokenStream) -> TokenStream {
 
     let json_to_data = quote! {
         let #data_ident: _ = ::resuma::__private::serde_json::from_value(data.clone())
-            .map_err(|e| ::resuma::__private::ResumaError::Other(format!("bad submit data: {}", e)))?;
+            .map_err(|e| ::resuma::__private::ResumaError::Validation(format!(
+                "Could not decode form data for submit `{}` into `{}`: {}. If `{}` is your own struct or enum, add #[data] above its definition.",
+                #name_str,
+                stringify!(#data_ident),
+                e,
+                stringify!(#data_ident),
+            )))?;
     };
 
     let call = if rest_idents.is_empty() {
@@ -65,8 +71,13 @@ pub fn expand(_args: TokenStream, input: TokenStream) -> TokenStream {
         quote! {
             {
                 let res = #call.await;
-                ::resuma::__private::serde_json::to_value(&res)
-                    .map_err(::resuma::__private::ResumaError::from)
+                ::resuma::__private::serde_json::to_value(&res).map_err(|e| {
+                    ::resuma::__private::ResumaError::Validation(format!(
+                        "Could not encode return value from submit `{}`: {}. If the return value is your own struct or enum, add #[data] above its definition.",
+                        #name_str,
+                        e,
+                    ))
+                })
             }
         }
     };

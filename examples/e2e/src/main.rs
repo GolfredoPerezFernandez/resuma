@@ -1,0 +1,151 @@
+use resuma::prelude::*;
+
+#[data]
+struct SaveCountInput {
+    value: i32,
+}
+
+#[data]
+struct SaveCountResult {
+    message: String,
+}
+
+#[data]
+struct ContactForm {
+    name: String,
+    email: String,
+}
+
+#[server]
+async fn save_count(input: SaveCountInput) -> Result<SaveCountResult> {
+    if input.value < 0 {
+        return Err(ResumaError::validation("count cannot be negative"));
+    }
+
+    Ok(SaveCountResult {
+        message: format!("Saved {}", input.value),
+    })
+}
+
+#[submit]
+async fn contact(data: ContactForm) -> std::result::Result<Redirect, SubmitError> {
+    if data.name.trim().is_empty() {
+        return Err(SubmitError::new("Fix the form").field("name", "Name is required"));
+    }
+    if !data.email.contains('@') {
+        return Err(SubmitError::new("Fix the form").field("email", "Email is invalid"));
+    }
+
+    Ok(Redirect::to("/thanks"))
+}
+
+#[component]
+fn Counter() {
+    let count = signal(0_i32);
+    let status = signal(String::new());
+
+    view! {
+        <section data-testid="counter">
+            <p data-testid="count">"Count: " {count}</p>
+            <button type="button" data-testid="increment" onClick={count.update(|c| *c += 1)}>
+                "Increment"
+            </button>
+            <button
+                type="button"
+                data-testid="save-count"
+                onClick={js! {
+                    const result = await __resuma.action("save_count", [{ value: state.count.value }]);
+                    state.status.set(result.message);
+                }}
+            >
+                "Save Count"
+            </button>
+            <p data-testid="save-status">{status}</p>
+        </section>
+    }
+}
+
+#[component]
+fn ContactCard() {
+    view! {
+        <section data-testid="contact-card">
+            <Form submit={contact} data-testid="contact-form">
+                <label>
+                    "Name"
+                    <input name="name" aria-label="Name" />
+                </label>
+                <label>
+                    "Email"
+                    <input name="email" aria-label="Email" />
+                </label>
+                <button type="submit">"Send"</button>
+            </Form>
+        </section>
+    }
+}
+
+fn nav() -> View {
+    view! {
+        <nav>
+            <NavLink href="/" activeClass="active" class="nav-link">"Home"</NavLink>
+            <NavLink href="/about" activeClass="active" class="nav-link">"About"</NavLink>
+        </nav>
+    }
+}
+
+#[component]
+fn HomePage() {
+    view! {
+        <main>
+            {nav()}
+            <h1>"Resuma E2E Home"</h1>
+            <Counter />
+            <ContactCard />
+        </main>
+    }
+}
+
+#[component]
+fn AboutPage() {
+    view! {
+        <main>
+            {nav()}
+            <h1>"About Resuma E2E"</h1>
+            <p data-testid="about-copy">"SPA navigation rendered this page."</p>
+        </main>
+    }
+}
+
+#[component]
+fn ThanksPage() {
+    view! {
+        <main>
+            {nav()}
+            <h1>"Thanks"</h1>
+            <p data-testid="thanks-copy">"Form submitted successfully."</p>
+        </main>
+    }
+}
+
+const INLINE_CSS: &str = r#"<style>
+body { font-family: system-ui, sans-serif; margin: 2rem auto; max-width: 42rem; line-height: 1.5; }
+nav { display: flex; gap: .75rem; margin-bottom: 1rem; }
+.active { font-weight: 700; }
+section { border: 1px solid #d0d7de; border-radius: 8px; margin: 1rem 0; padding: 1rem; }
+button { margin: .35rem .35rem .35rem 0; }
+label { display: block; margin: .5rem 0; }
+input { margin-left: .5rem; }
+.resuma-field-error { color: #b42318; display: block; margin-top: .25rem; }
+</style>"#;
+
+#[tokio::main]
+async fn main() -> std::io::Result<()> {
+    FlowApp::new()
+        .with_title("Resuma E2E")
+        .with_head(INLINE_CSS)
+        .component("/", HomePage)
+        .component("/about", AboutPage)
+        .component("/thanks", ThanksPage)
+        .serve(FlowServeOptions::default())
+        .await
+}

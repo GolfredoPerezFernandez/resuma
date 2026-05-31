@@ -181,9 +181,17 @@ impl<T: Clone + Serialize + 'static> WriteSignal<T> {
     }
 }
 
-/// Idiomatic constructor: `let count = use_signal(0);`.
-pub fn use_signal<T: Clone + Serialize + 'static>(initial: T) -> Signal<T> {
+/// Create a reactive signal.
+///
+/// `signal(0)` is the concise constructor recommended for application code.
+/// `use_signal(0)` remains available as the hook-style alias.
+pub fn signal<T: Clone + Serialize + 'static>(initial: T) -> Signal<T> {
     Signal::new(initial)
+}
+
+/// Hook-style alias for [`signal`].
+pub fn use_signal<T: Clone + Serialize + 'static>(initial: T) -> Signal<T> {
+    signal(initial)
 }
 
 fn fallback_id() -> SignalId {

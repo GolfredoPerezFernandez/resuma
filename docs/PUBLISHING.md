@@ -1,6 +1,6 @@
 # Publishing to crates.io
 
-**Current release:** [resuma 0.3.0](https://crates.io/crates/resuma) · [resuma-macros 0.3.0](https://crates.io/crates/resuma-macros) · [docs.rs/resuma](https://docs.rs/resuma)
+**Next release:** resuma 0.4.1 · resuma-macros 0.4.1 · [docs.rs/resuma](https://docs.rs/resuma)
 
 Resuma ships as **two crates** (Rust requires proc-macros in a separate crate):
 
@@ -14,7 +14,7 @@ Users install only:
 ```bash
 cargo install resuma
 # or
-resuma = "0.2"
+resuma = "0.4"
 ```
 
 ## Publish order
@@ -22,8 +22,13 @@ resuma = "0.2"
 ```bash
 cargo publish -p resuma-macros
 # wait ~90s
+cargo publish -p resuma --dry-run
 cargo publish -p resuma
 ```
+
+`resuma` depends on the matching `resuma-macros` version. A full `cargo publish -p resuma --dry-run`
+only works after that macros version is visible on crates.io; before then, rely on workspace tests
+and `cargo publish -p resuma-macros --dry-run`, then run the `resuma` dry-run after publishing macros.
 
 Or:
 

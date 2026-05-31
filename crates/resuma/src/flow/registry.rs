@@ -39,13 +39,13 @@ pub fn get_submit(name: &str) -> Option<SubmitFn> {
 pub async fn dispatch_load(name: &str, req: FlowRequest) -> Result<Value> {
     match get_loader(name) {
         Some(f) => f(req).await,
-        None => Err(ResumaError::Other(format!("unknown loader `{name}`"))),
+        None => Err(ResumaError::UnknownLoader(name.to_string())),
     }
 }
 
 pub async fn dispatch_submit(name: &str, data: Value, req: FlowRequest) -> Result<Value> {
     match get_submit(name) {
         Some(f) => f(data, req).await,
-        None => Err(ResumaError::Other(format!("unknown submit `{name}`"))),
+        None => Err(ResumaError::UnknownSubmit(name.to_string())),
     }
 }

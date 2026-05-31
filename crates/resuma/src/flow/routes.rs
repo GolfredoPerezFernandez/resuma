@@ -127,8 +127,13 @@ pub async fn handle_submit(
         }
         Err(err) => {
             let (message, field_errors) = parse_submit_error(&err);
+            let status = if field_errors.is_empty() {
+                http_status(&err)
+            } else {
+                StatusCode::UNPROCESSABLE_ENTITY
+            };
             (
-                StatusCode::BAD_REQUEST,
+                status,
                 axum::Json(SubmitResponse {
                     ok: false,
                     value: None,

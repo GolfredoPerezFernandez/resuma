@@ -50,9 +50,20 @@ pub fn expand(_args: TokenStream, input: TokenStream) -> TokenStream {
             let #id: _ = match args.get(#i).cloned() {
                 Some(v) => match ::resuma::__private::serde_json::from_value(v) {
                     Ok(v) => v,
-                    Err(e) => return Err(::resuma::__private::ResumaError::Other(format!("bad arg `{}`: {}", stringify!(#id), e))),
+                    Err(e) => return Err(::resuma::__private::ResumaError::Validation(format!(
+                        "Could not decode argument `{}` for server action `{}`: {}. If `{}` is your own struct or enum, add #[data] above its definition.",
+                        stringify!(#id),
+                        #name_str,
+                        e,
+                        stringify!(#id),
+                    ))),
                 },
-                None => return Err(::resuma::__private::ResumaError::Other(format!("missing arg `{}`", stringify!(#id)))),
+                None => return Err(::resuma::__private::ResumaError::Validation(format!(
+                    "Missing argument `{}` for server action `{}` at position {}.",
+                    stringify!(#id),
+                    #name_str,
+                    #i,
+                ))),
             };
         }
     });
@@ -69,15 +80,25 @@ pub fn expand(_args: TokenStream, input: TokenStream) -> TokenStream {
     let serialize_result = if returns_result {
         quote! {
             match #call.await {
-                Ok(v) => ::resuma::__private::serde_json::to_value(&v)
-                    .map_err(::resuma::__private::ResumaError::from),
+                Ok(v) => ::resuma::__private::serde_json::to_value(&v).map_err(|e| {
+                    ::resuma::__private::ResumaError::Validation(format!(
+                        "Could not encode return value from server action `{}`: {}. If the return value is your own struct or enum, add #[data] above its definition.",
+                        #name_str,
+                        e,
+                    ))
+                }),
                 Err(e) => Err(e),
             }
         }
     } else {
         quote! {
-            ::resuma::__private::serde_json::to_value(&#call.await)
-                .map_err(::resuma::__private::ResumaError::from)
+            ::resuma::__private::serde_json::to_value(&#call.await).map_err(|e| {
+                ::resuma::__private::ResumaError::Validation(format!(
+                    "Could not encode return value from server action `{}`: {}. If the return value is your own struct or enum, add #[data] above its definition.",
+                    #name_str,
+                    e,
+                ))
+            })
         }
     };
 

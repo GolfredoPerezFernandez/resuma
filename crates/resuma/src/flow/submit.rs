@@ -39,7 +39,11 @@ pub fn encode_submit_result<T: serde::Serialize>(
     res: Result<T, SubmitError>,
 ) -> crate::core::Result<serde_json::Value> {
     match res {
-        Ok(v) => serde_json::to_value(v).map_err(Into::into),
+        Ok(v) => serde_json::to_value(v).map_err(|e| {
+            crate::core::ResumaError::Validation(format!(
+                "Could not encode submit result: {e}. If the return value is your own struct or enum, add #[data] above its definition."
+            ))
+        }),
         Err(e) => Err(crate::core::ResumaError::Other(
             serde_json::to_string(&e).unwrap_or_else(|_| e.message.clone()),
         )),

@@ -2,7 +2,7 @@
 //!
 //! Demonstrates:
 //!   * `#[component]` definition and `view!` template syntax.
-//!   * `use_signal` reactive state captured by event handlers.
+//!   * `signal` reactive state captured by event handlers.
 //!   * Resumability — the SSR HTML embeds a serialised state payload that the
 //!     tiny client runtime resumes on first interaction.
 //!
@@ -16,17 +16,17 @@
 use resuma::prelude::*;
 
 #[component]
-fn Counter() -> View {
-    let count = use_signal(0_i32);
+fn Counter() {
+    let count = signal(0_i32);
 
     view! {
         <main class="card">
             <h1>"Resuma Counter"</h1>
             <p>"Current count: " {count}</p>
             <div class="row">
-                <button onClick={ move |_| count.update(|c| *c -= 1) }>"-"</button>
-                <button onClick={ move |_| count.update(|c| *c += 1) }>"+"</button>
-                <button onClick={ move |_| count.set(0) }>"reset"</button>
+                <button onClick={count.update(|c| *c -= 1)}>"-"</button>
+                <button onClick={count.update(|c| *c += 1)}>"+"</button>
+                <button onClick={count.set(0)}>"reset"</button>
             </div>
             <p class="hint">"This page is fully resumable — try opening DevTools, the only JS that loads is the ~3KB runtime."</p>
         </main>
@@ -50,7 +50,7 @@ async fn main() -> std::io::Result<()> {
     ResumaApp::new()
         .with_title("Resuma · Counter")
         .with_head(INLINE_CSS)
-        .page("/", || Counter::render(CounterProps::default()))
+        .component("/", Counter)
         .serve(ServeOptions::default())
         .await
 }

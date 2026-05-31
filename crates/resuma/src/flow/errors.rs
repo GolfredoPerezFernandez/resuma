@@ -34,6 +34,7 @@ impl FlowError {
                 ResumaError::Forbidden(_) => "Forbidden",
                 ResumaError::InvalidCsrf => "Invalid CSRF token",
                 ResumaError::RateLimited => "Too many requests",
+                ResumaError::Validation(message) => message,
                 _ => "Request blocked",
             },
         }

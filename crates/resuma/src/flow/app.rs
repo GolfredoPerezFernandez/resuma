@@ -8,6 +8,7 @@ use axum::middleware;
 use axum::routing::get;
 
 use crate::core::view::View;
+use crate::core::Component;
 use crate::server::ResumaApp;
 
 use super::cache::{loader_cache, merge_cache_control};
@@ -30,7 +31,7 @@ struct PageEntry {
 
 /// Full-stack application: pages, layouts, server loads, form submits, and middleware.
 ///
-/// Wraps [`ResumaApp`](crate::server::ResumaApp). Call [`serve`](Self::serve) with
+/// Wraps [`ResumaApp`]. Call [`serve`](Self::serve) with
 /// [`FlowServeOptions::from_env`] on Fly.io, Docker, or local dev.
 pub struct FlowApp {
     inner: ResumaApp,
@@ -195,6 +196,16 @@ impl FlowApp {
             },
         );
         self
+    }
+
+    /// Register a no-props component page without spelling
+    /// `Component::render(ComponentProps::default())`.
+    pub fn component<C>(self, pattern: &str, _component: C) -> Self
+    where
+        C: Component + 'static,
+        C::Props: Default,
+    {
+        self.page(pattern, |_req| C::render(Default::default()))
     }
 
     pub fn page_with_layouts<F>(mut self, pattern: &str, layouts: Vec<String>, handler: F) -> Self

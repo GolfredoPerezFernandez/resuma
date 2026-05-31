@@ -9,17 +9,17 @@
 //! use resuma::prelude::*;
 //!
 //! #[component]
-//! fn Counter() -> View {
-//!     let n = use_signal(0);
+//! fn Counter() {
+//!     let n = signal(0);
 //!     view! {
-//!         <button onClick={move |_| n.update(|v| *v += 1)}>{n}</button>
+//!         <button onClick={n.update(|v| *v += 1)}>{n}</button>
 //!     }
 //! }
 //!
 //! #[tokio::main]
 //! async fn main() -> std::io::Result<()> {
 //!     ResumaApp::new()
-//!         .page("/", || Counter::render(CounterProps::default()))
+//!         .component("/", Counter)
 //!         .serve(ServeOptions::default())
 //!         .await
 //! }
@@ -28,13 +28,13 @@
 //! Install the CLI: `cargo install resuma`. Narrative guides live at
 //! [resuma-docs.fly.dev](https://resuma-docs.fly.dev/docs).
 //!
-//! ## Resumability model (v0.3)
+//! ## Resumability model (v0.4)
 //!
 //! * Every [`#[component]`](component) is a **resumable boundary** — handlers register
 //!   under `/_resuma/handler/{Component}.js` and prefetch when the boundary enters the viewport.
 //! * [`computed!`](computed), [`effect!`](effect), and [`debounce!`](debounce) translate Rust
 //!   closures to client-replayable JS via rs2js (in `resuma-macros`).
-//! * Plain [`use_computed`](core::use_computed) / [`use_effect`](core::use_effect) run on SSR only;
+//! * Plain [`use_computed`] / [`use_effect`] run on SSR only;
 //!   use the macros when the browser must replay derived state or side effects.
 //! * [`#[island]`](island) is **optional** — for heavy lazy bundles, `load = "visible"`, or dev HMR.
 //!
@@ -44,7 +44,7 @@
 //! |--------|------|
 //! | [`core`] | Signals, `View`, [`RenderContext`], [`ResumePayload`] |
 //! | [`ssr`] | HTML rendering + embedded resumability payload |
-//! | [`server`] | axum HTTP, `ResumaApp`, `/_resuma/*` assets |
+//! | [`mod@server`] | axum HTTP, `ResumaApp`, `/_resuma/*` assets |
 //! | [`flow`] | `FlowApp`, file-based pages, `#[load]`, `#[submit]` |
 //! | [`router`] | Page discovery scanner |
 //! | [`cli`] | `resuma new` / `dev` / `build` (feature `cli`) |
@@ -55,7 +55,8 @@
 //! ## Re-exports
 //!
 //! Most apps start with [`prelude`] (`use resuma::prelude::*`). Macros (`view!`, `#[component]`,
-//! `#[server]`, Flow attributes) and common types are re-exported at the crate root for convenience.
+//! `#[server]`, `#[data]`, Flow attributes) and common types are re-exported at the crate root
+//! for convenience.
 
 pub mod client;
 pub mod core;
@@ -68,8 +69,8 @@ pub mod ssr;
 pub mod cli;
 
 pub use resuma_macros::{
-    component, computed, debounce, effect, island, js, layout, load, middleware, server, submit,
-    view,
+    component, computed, data, debounce, effect, island, js, layout, load, middleware, server,
+    submit, view,
 };
 
 pub use crate::client::{
@@ -78,12 +79,12 @@ pub use crate::client::{
 
 pub use crate::core::{
     combine_js, error_boundary, nav_link, no_serialize, portal, provide_context, provide_theme,
-    push_slots, resolve_slot, show, stream_chunk, stream_slot, theme_css_vars, use_computed,
-    use_computed_with_js, use_context, use_debounce, use_effect, use_signal, use_store, use_task,
-    use_theme, use_visible_task, visible_task_js, with_default_slot, with_view_transition, Child,
-    Component, Computed, ContextId, Effect, FlowRequest, IntoView, NoSerialize, ReadSignal,
-    RenderContext, RenderMode, Result, ResumaError, ResumePayload, Signal, SlotGuard, SlottedChild,
-    Store, Theme, View, WriteSignal,
+    push_slots, resolve_slot, show, signal, stream_chunk, stream_slot, theme_css_vars,
+    use_computed, use_computed_with_js, use_context, use_debounce, use_effect, use_signal,
+    use_store, use_task, use_theme, use_visible_task, visible_task_js, with_default_slot,
+    with_view_transition, Child, Component, Computed, ContextId, Effect, FlowRequest, IntoView,
+    NoSerialize, ReadSignal, RenderContext, RenderMode, Result, ResumaError, ResumePayload, Signal,
+    SlotGuard, SlottedChild, Store, Theme, View, WriteSignal,
 };
 
 pub use crate::server::{
@@ -119,25 +120,25 @@ pub mod prelude {
     //! Includes:
     //!
     //! * **Macros** — [`view!`](crate::view), [`#[component]`](crate::component),
-    //!   [`#[server]`](crate::server), [`computed!`](crate::computed),
+    //!   [`#[server]`](macro@crate::server), [`#[data]`](macro@crate::data), [`computed!`](crate::computed),
     //!   [`effect!`](crate::effect), [`debounce!`](crate::debounce), Flow (`#[load]`, `#[submit]`, …)
-    //! * **Components** — [`View`](crate::View), [`Signal`](crate::Signal), [`Component`](crate::Component)
-    //! * **Apps** — [`ResumaApp`](crate::ResumaApp), [`FlowApp`](crate::FlowApp),
-    //!   [`ServeOptions`](crate::ServeOptions), [`FlowServeOptions`](crate::FlowServeOptions)
-    //! * **SSR** — [`render_to_string`](crate::render_to_string), [`render_view`](crate::render_view)
-    //! * **Flow runtime** — [`FlowRequest`](crate::FlowRequest), [`current_request`](crate::current_request),
-    //!   [`use_load`](crate::use_load), [`form`](crate::form)
-    //! * **Client components** — [`ClientComponent`](crate::ClientComponent), [`client_component`](crate::client_component)
+    //! * **Components** — [`View`], [`Signal`], [`Component`]
+    //! * **Apps** — [`ResumaApp`], [`FlowApp`],
+    //!   [`ServeOptions`], [`FlowServeOptions`]
+    //! * **SSR** — [`render_to_string`], [`render_view`]
+    //! * **Flow runtime** — [`FlowRequest`], [`current_request`],
+    //!   [`use_load`], [`form`](crate::form())
+    //! * **Client components** — [`ClientComponent`], [`client_component`]
     //!
     //! For low-level types ([`RenderContext`](crate::RenderContext), [`ResumePayload`](crate::ResumePayload)),
     //! import from [`crate::core`].
     pub use super::{
         client_component, client_script_url, combine_js, component, computed, configure_security,
-        current_request, debounce, effect, error_boundary, error_page, extract_redirect,
+        current_request, data, debounce, effect, error_boundary, error_page, extract_redirect,
         flash_message, form, island, js, layout, load, load_boundary, middleware, nav_link,
         not_found_page, portal, provide_context, provide_theme, push_slots, redirect,
         redirect_with_flash, render_to_string, render_view, resolve_slot, server,
-        set_action_middleware, show, stream_slot, submit, theme_css_vars, try_use_load,
+        set_action_middleware, show, signal, stream_slot, submit, theme_css_vars, try_use_load,
         try_use_load_value, use_computed, use_computed_with_js, use_context, use_debounce,
         use_effect, use_load, use_signal, use_store, use_task, use_theme, use_visible_task, view,
         with_view_transition, Child, ClientComponent, Component, Computed, Effect, FlowApp,
@@ -165,6 +166,7 @@ pub mod __private {
     pub use crate::flow::form as flow_form;
     pub use crate::server::register_server_action;
     pub use ctor;
+    pub use serde;
     pub use serde_json;
 
     #[derive(Debug, Clone)]

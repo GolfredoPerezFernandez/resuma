@@ -7,6 +7,7 @@
 //! | [`view!`] | JSX-like templates → [`View`](https://docs.rs/resuma/latest/resuma/enum.View.html) |
 //! | [`#[component]`](component) | Resumable component + props builder (lazy handler boundary) |
 //! | [`#[server]`](server) | Async RPC at `POST /_resuma/action/:name` |
+//! | [`#[data]`](data) | Concise typed DTO/model helper |
 //! | [`computed!`](computed) | Client-replayable derived signal (rs2js) |
 //! | [`effect!`](effect) | Client-replayable side effect (rs2js) |
 //! | [`debounce!`](debounce) | Debounced client reaction |
@@ -15,6 +16,7 @@
 
 mod component_macro;
 mod computed_macro;
+mod data_macro;
 mod debounce_macro;
 mod effect_macro;
 mod island_macro;
@@ -48,6 +50,12 @@ pub fn component(args: TokenStream, input: TokenStream) -> TokenStream {
 #[proc_macro_attribute]
 pub fn server(args: TokenStream, input: TokenStream) -> TokenStream {
     server_macro::expand(args.into(), input.into()).into()
+}
+
+/// `#[data]` — concise DTO/model helper for Resuma data structs and enums.
+#[proc_macro_attribute]
+pub fn data(args: TokenStream, input: TokenStream) -> TokenStream {
+    data_macro::expand(args.into(), input.into()).into()
 }
 
 /// `#[island]` — optional interactive boundary for heavy or visibility-gated JS.

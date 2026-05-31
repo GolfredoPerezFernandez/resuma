@@ -11,6 +11,12 @@ pub enum ResumaError {
     #[error("server action `{0}` not found")]
     UnknownAction(String),
 
+    #[error("loader `{0}` not found")]
+    UnknownLoader(String),
+
+    #[error("submit `{0}` not found")]
+    UnknownSubmit(String),
+
     #[error("island `{0}` not found")]
     UnknownIsland(String),
 
@@ -32,6 +38,9 @@ pub enum ResumaError {
     #[error("request payload too large")]
     PayloadTooLarge,
 
+    #[error("validation error: {0}")]
+    Validation(String),
+
     #[error("{0}")]
     Other(String),
 }
@@ -43,8 +52,11 @@ impl ResumaError {
             Self::Unauthorized => 401,
             Self::Forbidden(_) | Self::InvalidCsrf => 403,
             Self::RateLimited => 429,
-            Self::UnknownAction(_) | Self::UnknownIsland(_) => 404,
-            Self::Serde(_) | Self::PayloadTooLarge => 422,
+            Self::UnknownAction(_)
+            | Self::UnknownLoader(_)
+            | Self::UnknownSubmit(_)
+            | Self::UnknownIsland(_) => 404,
+            Self::Serde(_) | Self::PayloadTooLarge | Self::Validation(_) => 422,
             Self::Render(_) | Self::Io(_) => 500,
             Self::Other(msg) if msg.eq_ignore_ascii_case("unauthorized") => 401,
             Self::Other(_) => 400,
@@ -58,8 +70,12 @@ impl ResumaError {
                 Self::Unauthorized => "Unauthorized".into(),
                 Self::Forbidden(_) | Self::InvalidCsrf => "Forbidden".into(),
                 Self::RateLimited => "Too many requests".into(),
-                Self::UnknownAction(_) => "Not found".into(),
-                Self::Serde(_) | Self::PayloadTooLarge => "Invalid request".into(),
+                Self::UnknownAction(_) | Self::UnknownLoader(_) | Self::UnknownSubmit(_) => {
+                    "Not found".into()
+                }
+                Self::Serde(_) | Self::PayloadTooLarge | Self::Validation(_) => {
+                    "Invalid request".into()
+                }
                 Self::Render(_) | Self::Io(_) => "Internal server error".into(),
                 Self::Other(msg) if msg.eq_ignore_ascii_case("unauthorized") => {
                     "Unauthorized".into()
@@ -70,6 +86,11 @@ impl ResumaError {
         } else {
             self.to_string()
         }
+    }
+
+    /// Convenience constructor for typed validation failures.
+    pub fn validation(message: impl Into<String>) -> Self {
+        Self::Validation(message.into())
     }
 }
 

@@ -25,10 +25,10 @@ jobs:
         run: cargo fmt --all -- --check
 
       - name: Clippy
-        run: cargo clippy -p resuma-macros -p resuma -- -D warnings
+        run: cargo clippy --workspace --all-targets -- -D warnings
 
       - name: Test
-        run: cargo test -p resuma --all-targets
+        run: cargo test --workspace
 
       - name: Check workspace
         run: cargo check --workspace
@@ -39,6 +39,14 @@ jobs:
           npm ci
           npm run build
           npm run size
+
+      - name: Install E2E browser
+        run: |
+          npm ci
+          npx playwright install --with-deps chromium
+
+      - name: Browser E2E
+        run: npm run e2e
 
   publish-dry-run:
     runs-on: ubuntu-latest
@@ -51,4 +59,19 @@ jobs:
       - name: cargo publish --dry-run (macros first)
         run: cargo publish -p resuma-macros --dry-run
       - name: cargo publish --dry-run (resuma)
-        run: cargo publish -p resuma --dry-run
+        shell: bash
+        run: |
+          VERSION=$(python - <<'PY'
+          import pathlib, re
+          text = pathlib.Path("Cargo.toml").read_text()
+          match = re.search(r'(?m)^version = "([^"]+)"', text)
+          if not match:
+              raise SystemExit("workspace version not found")
+          print(match.group(1))
+          PY
+          )
+          if cargo search resuma-macros --limit 1 | grep -q "resuma-macros = \"$VERSION\""; then
+            cargo publish -p resuma --dry-run
+          else
+            echo "resuma-macros $VERSION is not on crates.io yet; publish macros first, then dry-run/publish resuma."
+          fi

@@ -1,12 +1,15 @@
 {
   "name": "@resuma/runtime",
-  "version": "0.1.0",
+  "version": "0.4.1",
   "description": "Tiny client runtime for Resuma. Reads serialized state, lazy-loads event handlers, dispatches server actions. No hydration.",
   "type": "module",
   "main": "dist/loader.js",
   "module": "dist/loader.js",
   "types": "dist/loader.d.ts",
-  "files": ["dist", "src"],
+  "files": [
+    "dist",
+    "src"
+  ],
   "scripts": {
     "build:loader": "esbuild src/loader.ts --bundle --format=esm --target=es2020 --minify --outfile=dist/loader.js",
     "build:core": "esbuild src/core.ts --bundle --format=esm --target=es2020 --minify --outfile=dist/core.js",
@@ -17,7 +20,7 @@
     "size": "node scripts/measure.mjs"
   },
   "devDependencies": {
-    "esbuild": "^0.23.0",
+    "esbuild": "^0.28.0",
     "typescript": "^5.6.0"
   }
 }

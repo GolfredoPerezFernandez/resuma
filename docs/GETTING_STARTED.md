@@ -41,14 +41,14 @@ New projects include `rust-toolchain.toml` (stable) so `cargo`/`resuma dev` work
 
 ```toml
 # App Cargo.toml (what `resuma new` generates)
-resuma = "0.3"
+resuma = "0.4"
 tokio  = { version = "1", features = ["full"] }
 ```
 
 For library-only dependency trees (no CLI crates like clap/notify in the graph):
 
 ```toml
-resuma = { version = "0.3", default-features = false }
+resuma = { version = "0.4", default-features = false }
 ```
 
 ## Create a project
@@ -74,7 +74,7 @@ use resuma::prelude::*;
 
 #[component]
 fn Hello() -> View {
-    let excited = use_signal(false);
+    let excited = signal(false);
     view! {
         <main>
             <h1>"Hello Resuma"</h1>

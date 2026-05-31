@@ -19,13 +19,13 @@
  * interactions on demand.
  */
 
-import { initSignals, type SignalCell, applyDom, bindReactiveText, bindReactiveAttrs } from "./signals.js";
+import { initSignals, type SignalCell, applyDom, bindReactiveText, bindReactiveAttrs, type RawSignalId } from "./signals.js";
 import { initIslands } from "./islands.js";
 import { resolveHandler } from "./handler-loader.js";
 import { followRedirect, initNavLinks, remountPage } from "./navigation.js";
 
 interface ResumePayload {
-  signals: Array<{ id: { 0: number } | string; value: unknown }>;
+  signals: Array<{ id: RawSignalId; value: unknown }>;
   handlers: Record<string, Record<string, string>>;
   islands: string[];
   actions: string[];
@@ -77,10 +77,7 @@ function bootstrap(): void {
 
 function mountCurrentPage(): void {
   const payload = readPayload();
-  const signals = initSignals(payload.signals.map((s) => ({
-    id: typeof s.id === "string" ? s.id : `s${(s.id as { 0: number })[0]}`,
-    value: s.value,
-  })));
+  const signals = initSignals(payload.signals);
 
   const state: Record<string, SignalCell<unknown>> = {};
   for (const [k, cell] of signals) state[k] = cell;
@@ -208,7 +205,10 @@ function attachFormEnhancement(): void {
       const data = await res.json();
       if (!res.ok || data.ok === false) {
         showFieldErrors(form, data.field_errors ?? {});
-        throw new Error(data.error ?? `submit ${name} failed`);
+        if (res.status >= 500 || !data.field_errors) {
+          console.error("[resuma] submit error", data.error ?? `submit ${name} failed`);
+        }
+        return;
       }
       clearFieldErrors(form);
       if (data.redirect) {

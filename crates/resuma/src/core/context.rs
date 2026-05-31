@@ -290,7 +290,7 @@ pub struct ClientEffectSpec {
 ///
 /// # Fields
 ///
-/// * `signals` — serialized [`SignalSnapshot`](SignalSnapshot) values
+/// * `signals` — serialized [`SignalSnapshot`] values
 /// * `handlers` — inline handler JS (typically small `__page__` handlers only)
 /// * `lazy_chunks` — component/island chunk ids prefetched or fetched on demand
 /// * `effects` — client-replay specs from `computed!` / `effect!` / `debounce!`
@@ -341,6 +341,7 @@ pub fn page_needs_client(payload: &ResumePayload, body_html: &str) -> bool {
         "resuma-boundary",
         "resuma-dyn",
         "data-r-bind:",
+        "data-r-nav",
         "data-r-portal",
         "data-r-stream",
         "data-r-vt",

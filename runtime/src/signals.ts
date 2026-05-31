@@ -12,12 +12,23 @@ export interface SignalCell<T> {
   subscribe(fn: (v: T) => void): () => void;
 }
 
-interface RawSignal { id: string; value: unknown; }
+export type RawSignalId = string | number | { 0: number };
+
+interface RawSignal { id: RawSignalId; value: unknown; }
 
 export function initSignals(raws: RawSignal[]): Map<string, SignalCell<unknown>> {
   const map = new Map<string, SignalCell<unknown>>();
-  for (const r of raws) map.set(r.id, makeCell(r.id, r.value));
+  for (const r of raws) {
+    const id = signalId(r.id);
+    map.set(id, makeCell(id, r.value));
+  }
   return map;
+}
+
+export function signalId(raw: RawSignalId): string {
+  if (typeof raw === "string") return raw;
+  if (typeof raw === "number") return `s${raw}`;
+  return `s${raw[0]}`;
 }
 
 function makeCell<T>(id: string, initial: T): SignalCell<T> {

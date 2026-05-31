@@ -1,4 +1,4 @@
-//! Global request extensions injected into every [`FlowRequest`] (DB handles, config).
+//! Global request extensions injected into every [`crate::FlowRequest`] (DB handles, config).
 
 use std::collections::BTreeMap;
 

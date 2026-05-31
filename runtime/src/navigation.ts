@@ -3,11 +3,11 @@
  * swaps `#resuma-root` + `#resuma-state` without a full document reload.
  */
 
-import { bindReactiveAttrs, bindReactiveText, initSignals, type SignalCell } from "./signals.js";
+import { bindReactiveAttrs, bindReactiveText, initSignals, type SignalCell, type RawSignalId } from "./signals.js";
 import { initIslands } from "./islands.js";
 
 interface ResumePayload {
-  signals: Array<{ id: { 0: number } | string; value: unknown }>;
+  signals: Array<{ id: RawSignalId; value: unknown }>;
   handlers: Record<string, Record<string, string>>;
   islands: string[];
   actions: string[];
@@ -73,12 +73,7 @@ function updateNavActiveClasses(path: string): void {
 /** Re-mount signals and bindings after swapping page HTML. */
 export function remountPage(): void {
   const payload = readPayloadFromScript(document.getElementById(STATE_SCRIPT_ID));
-  const signals = initSignals(
-    payload.signals.map((s) => ({
-      id: typeof s.id === "string" ? s.id : `s${(s.id as { 0: number })[0]}`,
-      value: s.value,
-    })),
-  );
+  const signals = initSignals(payload.signals);
 
   const state: Record<string, SignalCell<unknown>> = {};
   for (const [k, cell] of signals) state[k] = cell;

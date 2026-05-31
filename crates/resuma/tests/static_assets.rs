@@ -82,3 +82,53 @@ async fn pre_registered_island_chunk_keeps_custom_resume() {
     assert!(src.contains("r.textContent='ok'"));
     assert!(!src.contains("export function resume(props, signals, root) {}"));
 }
+
+#[tokio::test]
+async fn handler_chunks_merge_new_symbols_for_existing_chunk() {
+    use parking_lot::RwLock;
+    use resuma::core::ResumePayload;
+    use std::collections::HashMap;
+    use std::sync::Arc;
+
+    let handlers: Arc<RwLock<HashMap<String, String>>> = Arc::new(RwLock::new(HashMap::new()));
+    let islands: Arc<RwLock<HashMap<String, String>>> = Arc::new(RwLock::new(HashMap::new()));
+
+    let first = ResumePayload {
+        signals: vec![],
+        handlers: [("Panel".into(), [("h_one".into(), "return 1".into())].into())].into(),
+        islands: vec![],
+        actions: vec![],
+        contexts: Default::default(),
+        visible_tasks: Default::default(),
+        effects: vec![],
+        lazy_chunks: vec![],
+        csrf_token: None,
+    };
+    let second = ResumePayload {
+        signals: vec![],
+        handlers: [(
+            "Panel".into(),
+            [(
+                "h_two".into(),
+                "async (_event, state, __resuma) => { return 2; }".into(),
+            )]
+            .into(),
+        )]
+        .into(),
+        islands: vec![],
+        actions: vec![],
+        contexts: Default::default(),
+        visible_tasks: Default::default(),
+        effects: vec![],
+        lazy_chunks: vec![],
+        csrf_token: None,
+    };
+
+    resuma::server::handler_assets::merge_payload_handlers(&handlers, &islands, &first);
+    resuma::server::handler_assets::merge_payload_handlers(&handlers, &islands, &second);
+
+    let src = handlers.read().get("Panel").cloned().unwrap();
+    assert!(src.contains("export function h_one("));
+    assert!(src.contains("export const h_two = async"));
+    assert!(!src.contains("export async ("));
+}

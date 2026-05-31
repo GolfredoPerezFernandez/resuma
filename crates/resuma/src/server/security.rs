@@ -331,15 +331,18 @@ pub fn apply_security_headers(mut response: Response, opts: &SecurityHeaderOptio
     );
 
     let csp = if let Some(nonce) = &opts.csp_nonce {
+        // The current resumability runtime compiles small inline handlers,
+        // effects, and visible tasks with `new Function`. Keep CSP honest so
+        // enabled Resuma features work under the default security headers.
         let mut policy = format!(
-            "default-src 'self'; script-src 'self' 'nonce-{nonce}'; style-src 'self' 'nonce-{nonce}'; img-src 'self' data:; font-src 'self'; connect-src 'self'; object-src 'none'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'"
+            "default-src 'self'; script-src 'self' 'nonce-{nonce}' 'unsafe-eval'; style-src 'self' 'nonce-{nonce}'; img-src 'self' data:; font-src 'self'; connect-src 'self'; object-src 'none'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'"
         );
         if opts.https {
             policy.push_str("; upgrade-insecure-requests");
         }
         policy
     } else {
-        let mut policy = "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self'; object-src 'none'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'".to_string();
+        let mut policy = "default-src 'self'; script-src 'self' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self'; object-src 'none'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'".to_string();
         if opts.https {
             policy.push_str("; upgrade-insecure-requests");
         }
@@ -445,5 +448,25 @@ mod tests {
         headers.insert(header::ORIGIN, "http://localhost:3000".parse().unwrap());
         // host carries the port as it would from the HTTP `Host` header.
         assert!(validate_origin(&headers, "localhost:3000").is_ok());
+    }
+
+    #[test]
+    fn csp_allows_runtime_compiled_handlers() {
+        let res = Response::new(axum::body::Body::empty());
+        let res = apply_security_headers(
+            res,
+            &SecurityHeaderOptions {
+                csp_nonce: Some("abc123".into()),
+                https: false,
+            },
+        );
+        let csp = res
+            .headers()
+            .get(header::CONTENT_SECURITY_POLICY)
+            .and_then(|v| v.to_str().ok())
+            .unwrap();
+
+        assert!(csp.contains("'nonce-abc123'"));
+        assert!(csp.contains("'unsafe-eval'"));
     }
 }

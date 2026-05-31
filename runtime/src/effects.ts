@@ -2,32 +2,28 @@
  * Client-side effect replay — computed, debounce, and registered side effects.
  */
 
-import type { SignalCell } from "./signals.js";
+import { signalId, type SignalCell, type RawSignalId } from "./signals.js";
 import type { ResumaGlobal } from "./core.js";
 
 export interface ClientEffectSpec {
   id: number;
-  deps: Array<{ 0: number } | string>;
-  captures?: Record<string, { 0: number } | string>;
+  deps: RawSignalId[];
+  captures?: Record<string, RawSignalId>;
   kind: string;
   body: string;
-  target?: { 0: number } | string;
+  target?: RawSignalId;
   debounce_ms?: number;
 }
 
-function sid(raw: { 0: number } | string): string {
-  return typeof raw === "string" ? raw : `s${raw[0]}`;
-}
-
 function buildEffectState(
-  captures: Record<string, { 0: number } | string> | undefined,
+  captures: Record<string, RawSignalId> | undefined,
   signals: Map<string, SignalCell<unknown>>,
   global: ResumaGlobal,
 ): Record<string, SignalCell<unknown>> {
   const local: Record<string, SignalCell<unknown>> = Object.create(global.state);
   if (!captures) return local;
   for (const [name, idRaw] of Object.entries(captures)) {
-    const cell = signals.get(sid(idRaw));
+    const cell = signals.get(signalId(idRaw));
     if (cell) local[name] = cell;
   }
   return local;
@@ -57,7 +53,7 @@ export function initEffects(
       schedule();
 
       for (const dep of eff.deps) {
-        const cell = signals.get(sid(dep));
+        const cell = signals.get(signalId(dep));
         cell?.subscribe(() => schedule());
       }
     } catch (err) {

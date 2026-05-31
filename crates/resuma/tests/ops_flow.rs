@@ -110,6 +110,159 @@ fn redirect_submit(
 
 const TEST_CSRF: &str = "abcdef0123456789abcdef";
 
+#[data]
+struct ActionDto {
+    value: i32,
+}
+
+#[data]
+struct ActionReply {
+    message: String,
+}
+
+#[server]
+async fn ops_flow_data_action(input: ActionDto) -> Result<ActionReply> {
+    Ok(ActionReply {
+        message: format!("value={}", input.value),
+    })
+}
+
+#[data]
+struct EmptySubmit {}
+
+#[submit]
+async fn ops_flow_invalid_submit(_data: EmptySubmit) -> std::result::Result<(), SubmitError> {
+    Err(SubmitError::new("Please fix the form").field("title", "Title is required"))
+}
+
+#[tokio::test(flavor = "multi_thread")]
+async fn data_macro_supplies_action_serialization_traits() {
+    let app = FlowApp::new()
+        .page("/", |_req| view! { <main>"home"</main> })
+        .into_router(FlowServeOptions::default());
+
+    let res = app
+        .oneshot(
+            Request::post("/_resuma/action/ops_flow_data_action")
+                .header("content-type", "application/json")
+                .header("host", "localhost")
+                .header("cookie", format!("__resuma-csrf={TEST_CSRF}"))
+                .header("x-resuma-csrf", TEST_CSRF)
+                .extension(test_connect_info())
+                .body(Body::from(r#"{"args":[{"value":7}]}"#))
+                .unwrap(),
+        )
+        .await
+        .unwrap();
+
+    assert_eq!(res.status(), StatusCode::OK);
+    let body = axum::body::to_bytes(res.into_body(), usize::MAX)
+        .await
+        .unwrap();
+    let json: serde_json::Value = serde_json::from_slice(&body).unwrap();
+    assert_eq!(json["value"]["message"], "value=7");
+}
+
+#[tokio::test(flavor = "multi_thread")]
+async fn action_decode_error_names_argument_and_suggests_data_macro() {
+    let app = FlowApp::new()
+        .page("/", |_req| view! { <main>"home"</main> })
+        .into_router(FlowServeOptions::default());
+
+    let res = app
+        .oneshot(
+            Request::post("/_resuma/action/ops_flow_data_action")
+                .header("content-type", "application/json")
+                .header("host", "localhost")
+                .header("cookie", format!("__resuma-csrf={TEST_CSRF}"))
+                .header("x-resuma-csrf", TEST_CSRF)
+                .extension(test_connect_info())
+                .body(Body::from(r#"{"args":[{"value":"wrong"}]}"#))
+                .unwrap(),
+        )
+        .await
+        .unwrap();
+
+    assert_eq!(res.status(), StatusCode::UNPROCESSABLE_ENTITY);
+    let body = axum::body::to_bytes(res.into_body(), usize::MAX)
+        .await
+        .unwrap();
+    let json: serde_json::Value = serde_json::from_slice(&body).unwrap();
+    let error = json["error"].as_str().unwrap();
+    assert!(error.contains("argument `input`"));
+    assert!(error.contains("ops_flow_data_action"));
+    assert!(error.contains("#[data]"));
+}
+
+#[tokio::test(flavor = "multi_thread")]
+async fn submit_field_errors_return_422_json() {
+    let app = FlowApp::new()
+        .page("/", |_req| view! { <main>"home"</main> })
+        .into_router(FlowServeOptions::default());
+
+    let res = app
+        .oneshot(
+            Request::post("/_resuma/submit/ops_flow_invalid_submit")
+                .header("content-type", "application/x-www-form-urlencoded")
+                .header("accept", "application/json")
+                .header("host", "localhost")
+                .header("cookie", format!("__resuma-csrf={TEST_CSRF}"))
+                .header("x-resuma-csrf", TEST_CSRF)
+                .extension(test_connect_info())
+                .body(Body::from(""))
+                .unwrap(),
+        )
+        .await
+        .unwrap();
+
+    assert_eq!(res.status(), StatusCode::UNPROCESSABLE_ENTITY);
+    let body = axum::body::to_bytes(res.into_body(), usize::MAX)
+        .await
+        .unwrap();
+    let json: serde_json::Value = serde_json::from_slice(&body).unwrap();
+    assert_eq!(json["ok"], serde_json::Value::Bool(false));
+    assert_eq!(json["error"], "Please fix the form");
+    assert_eq!(json["field_errors"]["title"], "Title is required");
+}
+
+#[tokio::test(flavor = "multi_thread")]
+async fn unknown_submit_returns_404_json() {
+    let app = FlowApp::new()
+        .page("/", |_req| view! { <main>"home"</main> })
+        .into_router(FlowServeOptions::default());
+
+    let res = app
+        .oneshot(
+            Request::post("/_resuma/submit/does_not_exist")
+                .header("content-type", "application/x-www-form-urlencoded")
+                .header("accept", "application/json")
+                .header("host", "localhost")
+                .header("cookie", format!("__resuma-csrf={TEST_CSRF}"))
+                .header("x-resuma-csrf", TEST_CSRF)
+                .extension(test_connect_info())
+                .body(Body::from(""))
+                .unwrap(),
+        )
+        .await
+        .unwrap();
+
+    assert_eq!(res.status(), StatusCode::NOT_FOUND);
+    let body = axum::body::to_bytes(res.into_body(), usize::MAX)
+        .await
+        .unwrap();
+    let json: serde_json::Value = serde_json::from_slice(&body).unwrap();
+    assert_eq!(json["ok"], serde_json::Value::Bool(false));
+    assert!(json["error"].as_str().unwrap().contains("does_not_exist"));
+}
+
+#[test]
+fn validation_errors_are_422() {
+    assert_eq!(
+        ResumaError::validation("bad input").status_code(),
+        StatusCode::UNPROCESSABLE_ENTITY.as_u16()
+    );
+}
+
 #[tokio::test(flavor = "multi_thread")]
 async fn submit_redirect_303_without_js() {
     resuma::register_submit("ops_flow_redirect_submit", redirect_submit);
@@ -187,5 +340,24 @@ fn render_view_snapshot_is_stable() {
     assert_eq!(
         html,
         r#"<section class="card"><h2>Title</h2><p>Body text</p></section>"#
+    );
+}
+
+#[test]
+fn view_macro_decodes_rust_string_literals() {
+    use resuma::core::context::{with_context, RenderContext, RenderMode};
+
+    let view = view! {
+        <p title="quote: \"">
+            "Line\nBreak \"quoted\""
+        </p>
+    };
+
+    let ctx = RenderContext::new(RenderMode::Ssr);
+    let html = with_context(ctx, || resuma::ssr::render_view(&view));
+
+    assert_eq!(
+        html,
+        "<p title=\"quote: &quot;\">Line\nBreak \"quoted\"</p>"
     );
 }

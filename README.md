@@ -81,12 +81,12 @@ resuma dev --open
 use resuma::prelude::*;
 
 #[component]
-fn Counter() -> View {
-    let count = use_signal(0);
+fn Counter() {
+    let count = signal(0);
     view! {
         <main>
             <h1>"Count: " {count}</h1>
-            <button onClick={ move |_| count.update(|c| *c += 1) }>"+"</button>
+            <button onClick={count.update(|c| *c += 1)}>"+"</button>
         </main>
     }
 }
@@ -98,7 +98,7 @@ Handlers compile to JavaScript automatically — lazy-loaded on first interactio
 
 ```toml
 [dependencies]
-resuma = "0.3"
+resuma = "0.4"
 tokio  = { version = "1", features = ["full"] }
 ```
 
@@ -107,8 +107,14 @@ tokio  = { version = "1", features = ["full"] }
 ## Server actions
 
 ```rust
+#[data]
+struct SearchResult {
+    title: String,
+    url: String,
+}
+
 #[server]
-async fn search(q: String) -> Vec<String> {
+async fn search(q: String) -> Vec<SearchResult> {
     db::search(&q).await
 }
 ```
@@ -223,9 +229,18 @@ cargo run -p example-counter
 cargo run -p example-todo
 ```
 
+Manual apps can mount no-props components without the verbose render path:
+
+```rust
+ResumaApp::new()
+    .component("/", App)
+    .serve(ServeOptions::default())
+    .await
+```
+
 ---
 
-## What ships in v0.3
+## What ships in v0.4
 
 - `view!{}` — JSX-like templates
 - `#[component]` — resumable by default

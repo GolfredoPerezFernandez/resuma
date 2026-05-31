@@ -31,12 +31,12 @@ The client runtime (~3KB loader) parses that payload and delegates events at the
 use resuma::prelude::*;
 
 #[component]
-fn Counter() -> View {
-    let count = use_signal(0);
+fn Counter() {
+    let count = signal(0);
     view! {
         <main>
             <h1>"Count: " {count}</h1>
-            <button onClick={ move |_| count.update(|c| *c += 1) }>"+"</button>
+            <button onClick={count.update(|c| *c += 1)}>"+"</button>
         </main>
     }
 }

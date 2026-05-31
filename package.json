@@ -1,0 +1,12 @@
+{
+  "name": "resuma-workspace",
+  "version": "0.4.1",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "e2e": "node e2e/run.mjs"
+  },
+  "devDependencies": {
+    "playwright": "1.60.0"
+  }
+}

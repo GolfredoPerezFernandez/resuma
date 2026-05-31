@@ -6,7 +6,7 @@
 //! to JavaScript via `resuma-rs2js`.
 
 use proc_macro2::{Delimiter, Literal, Span, TokenStream, TokenTree};
-use quote::quote;
+use quote::{quote, quote_spanned};
 use std::iter::Peekable;
 use std::vec::IntoIter;
 
@@ -279,11 +279,9 @@ fn expect_punct(iter: &mut TokenIter, c: char) -> Result<(), String> {
 
 fn unquote_string(lit: &Literal) -> String {
     let s = lit.to_string();
-    if s.starts_with('"') && s.ends_with('"') && s.len() >= 2 {
-        s[1..s.len() - 1].to_string()
-    } else {
-        s
-    }
+    syn::parse_str::<syn::LitStr>(&s)
+        .map(|lit| lit.value())
+        .unwrap_or(s)
 }
 
 // ---------- emitter ----------
@@ -653,23 +651,17 @@ fn emit_event_handler(attr_name: String, value: AttrVal) -> TokenStream {
                             t.actions.into_iter().collect(),
                         ),
                         Err(e) => {
-                            return compile_err(&format!(
-                                "rs2js cannot translate handler: {}",
-                                e.message
-                            ))
+                            return compile_err_at(e.span, &handler_translation_help(&e.message))
                         }
                     },
                     Ok(other) => match rs2js::translate_expr(&other) {
                         Ok(t) => (
-                            format!("(_event) => {{ {} }}", t.js),
+                            format!("async (_event, state, __resuma) => {{ {}; }}", t.js),
                             t.captures.into_iter().collect(),
                             t.actions.into_iter().collect(),
                         ),
                         Err(e) => {
-                            return compile_err(&format!(
-                                "rs2js cannot translate handler: {}",
-                                e.message
-                            ))
+                            return compile_err_at(e.span, &handler_translation_help(&e.message))
                         }
                     },
                     Err(e) => return compile_err(&format!("invalid handler expression: {}", e)),
@@ -795,6 +787,22 @@ fn stable_symbol(attr: &str, js: &str) -> String {
 }
 
 fn compile_err(msg: &str) -> TokenStream {
+    compile_err_at(Span::call_site(), msg)
+}
+
+fn compile_err_at(span: Span, msg: &str) -> TokenStream {
     let lit = Literal::string(msg);
-    quote! { (String::from(""), { compile_error!(#lit); ::resuma::__private::AttrValue::Bool(false) }) }
+    quote_spanned! {span=>
+        (String::from(""), { compile_error!(#lit); ::resuma::__private::AttrValue::Bool(false) })
+    }
+}
+
+fn handler_translation_help(message: &str) -> String {
+    format!(
+        "Resuma could not compile this event handler to browser JavaScript: {message}.\n\n\
+         Supported handlers are intentionally small and resumable. Try one of these:\n\
+         - update signals directly: onClick={{count.update(|c| *c += 1)}}\n\
+         - use js! {{ ... }} for DOM/browser APIs\n\
+         - move complex Rust or database work into a #[server] action"
+    )
 }

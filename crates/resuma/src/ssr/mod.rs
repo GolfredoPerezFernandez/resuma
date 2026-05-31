@@ -83,6 +83,17 @@ pub fn render_document(opts: &PageOptions, path: &str, view: &View) -> (String, 
     (wrap_document(opts, &body, &payload, path), payload)
 }
 
+/// Render a view that was already built inside an external [`RenderContext`].
+pub fn render_prebuilt_document(
+    opts: &PageOptions,
+    path: &str,
+    view: &View,
+    payload: &ResumePayload,
+) -> String {
+    let body = render_view(view);
+    wrap_document(opts, &body, payload, path)
+}
+
 /// Render a `View` produced by a component to a complete HTML document.
 pub fn render_to_string<F>(opts: &PageOptions, build_view: F) -> String
 where

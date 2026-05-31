@@ -13,7 +13,7 @@ h1 { margin: 0 0 .5rem; font-size: 2rem; }
 p { margin: .5rem 0; color: #4338ca; }
 </style>"#;
 
-fn home() -> View {
+fn home() {
     view! {
         <main>
             <h1>"Hello, Resuma"</h1>
@@ -45,7 +45,7 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-resuma = "0.3"
+resuma = "0.4"
 tokio  = { version = "1", features = ["full"] }
 "#;
 
@@ -55,7 +55,7 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-resuma      = "0.3"
+resuma      = "0.4"
 tokio       = { version = "1", features = ["full"] }
 serde       = { version = "1", features = ["derive"] }
 serde_json  = { version = "1" }
@@ -69,7 +69,7 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-resuma = "0.3"
+resuma = "0.4"
 tokio  = { version = "1", features = ["full"] }
 serde  = { version = "1", features = ["derive"] }
 "#;
@@ -86,7 +86,7 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-resuma = "0.3"
+resuma = "0.4"
 tokio  = { version = "1", features = ["full"] }
 serde  = { version = "1", features = ["derive"] }
 sqlx   = { version = "0.8", features = ["runtime-tokio", "sqlite", "macros", "migrate"] }
@@ -140,7 +140,7 @@ pub fn create_project(name: &str, template: &str) -> Result<()> {
 
     let readme = README.replace("%NAME%", name);
     fs::write(dir.join("README.md"), readme).context("write README.md")?;
-    fs::write(dir.join(".gitignore"), "target/\nCargo.lock\n").context("write .gitignore")?;
+    fs::write(dir.join(".gitignore"), "target/\n").context("write .gitignore")?;
     fs::write(dir.join("rust-toolchain.toml"), RUST_TOOLCHAIN)
         .context("write rust-toolchain.toml")?;
 
