@@ -19,8 +19,8 @@ license = "MIT OR Apache-2.0"
 repository = "https://github.com/GolfredoPerezFernandez/resuma"
 homepage = "https://resuma-docs.fly.dev"
 documentation = "https://resuma-docs.fly.dev/docs"
-description = "Resumable SSR web framework for Rust - zero hydration, ~907 B client loader, server actions, islands, and Flow"
-keywords = ["web", "framework", "ssr", "rust", "axum"]
+description = "Resuma: resumable SSR Rust web framework (not a CV app). Zero hydration, ~907 B loader, Axum, server actions, Flow."
+keywords = ["web", "framework", "ssr", "resumability", "axum"]
 categories = ["web-programming", "asynchronous"]
 readme = "README.md"
 

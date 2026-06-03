@@ -1,12 +1,14 @@
 <div align="center">
 
-<img src="assets/logo.svg" alt="Resuma" width="80" height="80" />
+<img src="assets/logo.svg" alt="Resuma Rust web framework logo" width="80" height="80" />
 
-# Resuma
+# Resuma — resumable SSR web framework for Rust
 
-**Instantly-interactive Rust web apps — without hydration.**
+**Instantly-interactive Rust web apps — without hydration.** Not a résumé/CV builder.
 
 Ship HTML from the server. The browser **resumes** serialized state and lazy handler chunks — it never re-runs your components. Static pages ship **zero client JS**.
+
+**Official repo:** [github.com/GolfredoPerezFernandez/resuma](https://github.com/GolfredoPerezFernandez/resuma) · **Docs:** [resuma-docs.fly.dev](https://resuma-docs.fly.dev/docs) · **Crate:** [crates.io/crates/resuma](https://crates.io/crates/resuma)
 
 [![Crates.io](https://img.shields.io/crates/v/resuma.svg)](https://crates.io/crates/resuma)
 [![docs.rs](https://img.shields.io/docsrs/resuma)](https://docs.rs/resuma)
@@ -266,6 +268,19 @@ Contributions welcome — read [CONTRIBUTING.md](CONTRIBUTING.md) first.
 ## Why "Resuma"?
 
 Spanish for both *resumes* (continues) and *summary* — the framework **resumes** execution from a serialized summary of the server-side render.
+
+> **Looking for a resume/CV app?** This repository is a **Rust full-stack web framework** (SSR, Axum, server actions). Resume-builder projects on GitHub use the same name but are unrelated.
+
+## Find this project (search & links)
+
+| If you searched for… | You want |
+|----------------------|--------|
+| `resuma github` + Rust / SSR / framework | **This repo** — [GolfredoPerezFernandez/resuma](https://github.com/GolfredoPerezFernandez/resuma) |
+| `resuma rust framework` | [Getting started](https://resuma-docs.fly.dev/docs/getting_started) · `cargo install resuma` |
+| `rust web framework no hydration` | [Architecture](https://resuma-docs.fly.dev/docs/architecture) · [Benchmark](https://resuma-docs.fly.dev/docs/benchmark) |
+| `qwik rust` / resumability | [Flow guide](https://resuma-docs.fly.dev/docs/flow) · Qwik-style lazy handlers in Rust |
+
+**Topics:** Rust · SSR · resumability · Axum · server actions · islands · zero hydration · `resuma` on [crates.io](https://crates.io/crates/resuma).
 
 ## License
 
